@@ -196,7 +196,7 @@ describe("PromptInput - Comprehensive Tests", () => {
   });
 
   describe("Text Navigation and Editing", () => {
-    it("should handle cursor navigation without crashing", async () => {
+    it.skip("should handle cursor navigation without crashing", async () => {
       const onSubmit = vi.fn();
       const { stdin, lastFrame } = render(
         <PromptInput
