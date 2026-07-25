@@ -12,6 +12,7 @@ export type CommandCallStatus = "executing" | "success" | "error";
  * All available command names
  */
 export type CommandName =
+  | "/autoedit"
   | "/btw"
   | "/clear"
   | "/compact"
@@ -105,7 +106,9 @@ export type MCPResult = MCPServerState[];
 /**
  * Generic type for command results based on command name
  */
-export type CommandConcreteResult<T extends CommandName> = T extends "/btw"
+export type CommandConcreteResult<T extends CommandName> = T extends "/autoedit"
+  ? AutoEditResult
+  : T extends "/btw"
   ? string
   : T extends "/clear"
     ? ClearResult

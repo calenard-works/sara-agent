@@ -1,3 +1,4 @@
+import { autoeditCommand } from "./autoeditCommand";
 import { planCommand } from "./planCommand";
 import { permissionCommand } from "./permissionCommand";
 import { yoloCommand } from "./yoloCommand";
@@ -25,6 +26,7 @@ import type { CommandName, CommandHandler } from "./command.types";
  * All available command handlers with their names
  */
 export const ALL_COMMANDS = [
+  autoeditCommand,
   btwCommand,
   clearCommand,
   compactCommand,
@@ -57,6 +59,7 @@ type AnyCommandHandler = CommandHandler<unknown>;
  * Partial — `/welcome` is not a real command.
  */
 export const COMMANDS_BY_NAME: Partial<Record<CommandName, AnyCommandHandler>> = {
+  "/autoedit": autoeditCommand,
   "/btw": btwCommand,
   "/clear": clearCommand,
   "/compact": compactCommand,

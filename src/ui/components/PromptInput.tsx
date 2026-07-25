@@ -274,8 +274,14 @@ export function PromptInput({
     );
   }, [valueRef.current, cursorRef.current]);
 
+  // Limit to 6 displayed commands
+  const displayedCommands = useMemo(
+    () => filteredCommands.slice(0, 6),
+    [filteredCommands],
+  );
+
   // Determine if command palette should be shown
-  const shouldShowCommandPalette = filteredCommands.length > 0;
+  const shouldShowCommandPalette = displayedCommands.length > 0;
 
   // Handle command selection
   const handleCommandSelect = useCallback(
@@ -284,11 +290,11 @@ export function PromptInput({
         return;
       }
 
-      if (commandIndex < 0 || commandIndex >= filteredCommands.length) {
+      if (commandIndex < 0 || commandIndex >= displayedCommands.length) {
         return;
       }
 
-      const selectedCommand = filteredCommands[commandIndex];
+      const selectedCommand = displayedCommands[commandIndex];
 
       // Execute the command
       if (onExecuteCommand) {
@@ -413,7 +419,7 @@ export function PromptInput({
           return;
         } else if (key.downArrow) {
           setSelectedCommandIndex((prev) =>
-            Math.min(filteredCommands.length - 1, prev + 1),
+            Math.min(displayedCommands.length - 1, prev + 1),
           );
           return;
         } else if (key.return) {
@@ -644,7 +650,7 @@ export function PromptInput({
       {shouldShowCommandPalette && (
         <CommandPalette
           selectedIndex={selectedCommandIndex}
-          commands={filteredCommands}
+          commands={displayedCommands}
         />
       )}
 
