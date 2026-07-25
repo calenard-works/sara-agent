@@ -133,6 +133,47 @@ function renderToken(
         </Box>
       );
 
+    case "table":
+      return (
+        <Box key={key} marginBottom={marginBottom} flexDirection="column">
+          {/* Header row */}
+          <Box flexDirection="row">
+            {token.header.map((cell, i) => (
+              <Text
+                key={i}
+                bold
+                color={theme.text}
+                style={getTableAlignStyle(token.align?.[i])}
+              >
+                {padCell(cell.text, token.header.length, i)}
+              </Text>
+            ))}
+          </Box>
+          {/* Separator */}
+          <Box flexDirection="row">
+            {token.header.map((_, i) => (
+              <Text key={i} color={theme.textMuted}>
+                {padCell("─".repeat(8), token.header.length, i)}
+              </Text>
+            ))}
+          </Box>
+          {/* Data rows */}
+          {token.rows.map((row, ri) => (
+            <Box key={ri} flexDirection="row">
+              {row.map((cell, ci) => (
+                <Text
+                  key={ci}
+                  color={theme.textDim}
+                  style={getTableAlignStyle(token.align?.[ci])}
+                >
+                  {padCell(cell.text, row.length, ci)}
+                </Text>
+              ))}
+            </Box>
+          ))}
+        </Box>
+      );
+
     default:
       if ("raw" in token) {
         return <Text key={key}>{token.raw}</Text>;
@@ -208,3 +249,25 @@ function renderInlineTokens(tokens: Token[]): React.ReactNode {
 }
 
 export default InkMarkdown;
+
+/** Map a marked alignment string to an Ink text-align style. */
+function getTableAlignStyle(
+  align: string | null | undefined,
+): "left" | "center" | "right" | undefined {
+  if (align === "center") return "center";
+  if (align === "right") return "right";
+  return undefined; // left or null → default
+}
+
+/**
+ * Pad a cell's text to a fixed width based on the number of columns.
+ * Each cell gets a minimum width of 8 characters, with 2 spaces of
+ * padding between columns.
+ */
+function padCell(text: string, columnCount: number, columnIndex: number): string {
+  const minWidth = 8;
+  const spacing = 2;
+  const width = Math.max(minWidth, Math.floor(30 / columnCount));
+  const truncated = text.length > width ? text.slice(0, width - 1) + "…" : text;
+  return truncated.padEnd(width + spacing);
+}
