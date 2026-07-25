@@ -280,6 +280,8 @@ export interface Session {
   sessionId: string;
   messages: LLMMessage[];
   toolCalls: ToolCall[];
+  title?: string;
+  lastActivity?: number;
 }
 
 function randomId(prefix: string): string {
@@ -289,10 +291,14 @@ function randomId(prefix: string): string {
 export function createSession(init?: {
   messages?: LLMMessage[];
   toolCalls?: ToolCall[];
+  title?: string;
+  lastActivity?: number;
 }): Session {
   return {
     sessionId: randomId("session"),
     messages: init?.messages ?? [],
     toolCalls: init?.toolCalls ?? [],
+    title: init?.title,
+    lastActivity: init?.lastActivity ?? Date.now(),
   };
 }

@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.3.3 (2026-07-25)
+
+### Added
+- Home/End keys for cursor navigation in input field
+- Shift+Enter as alternative to Option+Enter for multi-line input
+- Session persistence: sessions now saved to `~/.sara/sessions/` and restored on restart
+- `-s, --session <id>` CLI flag to resume a specific session
+- `-c, --continue` CLI flag to continue the last session
+- `/sessions` command: list, switch (Enter), rename (R), delete (double D) sessions
+- Resume message on exit: `To resume this session, run sara -s {id} or continue with sara -c`
+- Session titles auto-generated from first user message
+- Relative time display in session list (e.g. "1h 16min")
+- Header shows "Directory:" and "Model:" prefixes
+- Status bar items separated with dots (•)
+
+### Changed
+- Header Sara title now perfectly centered
+- Version removed from status bar (already done in 0.3.2)
+
 ## 0.3.2 (2026-07-25)
 
 ### Added

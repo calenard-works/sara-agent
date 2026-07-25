@@ -4,7 +4,7 @@ import { Box, Text } from "ink";
 
 import type { PermissionOption } from "../../permissions/types";
 import type { AppState, AppActions } from "../hooks/useAppState";
-import type { LLMMessage } from "../../sessions/types";
+import type { LLMMessage, Session } from "../../sessions/types";
 import { isTransientToolState } from "../../tools/runner.types";
 import { Logo } from "./Logo";
 import { ConfigManager } from "../../config";
@@ -16,6 +16,7 @@ import { CommandName } from "../commands";
 import { getCurrentTheme } from "../theme";
 import { ProviderSelector } from "./ProviderSelector";
 import { KeyInput } from "./KeyInput";
+import { SessionList } from "./SessionList";
 import { fetchAllProviderModels } from "../../models/registry";
 
 export interface LayoutProps {
@@ -169,11 +170,11 @@ export function Layout({
       <Box flexDirection="column">
         <Logo />
         <Box marginTop={1}>
-          <Text dimColor>{cwd}</Text>
+          <Text dimColor>Directory: {cwd}</Text>
         </Box>
         <Box>
           {hasProvider && modelDisplayName ? (
-            <Text dimColor>{modelDisplayName}</Text>
+            <Text dimColor>Model: {modelDisplayName}</Text>
           ) : (
             <Text dimColor>
               not signed, run{" "}
@@ -324,6 +325,23 @@ export function Layout({
             onCancel={handleInteractiveCancel}
           />
         );
+      case "sessions-list": {
+        const handleSessionSelect = (session: Session) => {
+          actions.loadSession(
+            session.sessionId,
+            session.messages,
+            session.title,
+          );
+          actions.setInteractiveMode(null);
+        };
+        return (
+          <SessionList
+            sessions={mode.sessions}
+            onSelect={handleSessionSelect}
+            onCancel={handleInteractiveCancel}
+          />
+        );
+      }
     }
   };
 

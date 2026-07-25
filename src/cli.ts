@@ -13,10 +13,13 @@ import { App } from "./ui/App";
 import { runNonInteractive } from "./nonInteractive/runner";
 import { createConfigCommand } from "./cli/config";
 import { mcpService } from "./mcp";
+import { loadSession, getLastSession } from "./sessions/persistence";
 
 type GlobalOptions = {
   approvalMode?: "autoEdit" | "yolo" | "default";
   workDir?: string;
+  session?: string;
+  continue?: boolean;
 };
 
 function findPackageJsonPath(startDir: string): string | null {
@@ -64,7 +67,9 @@ export async function runCli(argv: string[] = process.argv): Promise<void> {
         return value as "default" | "autoEdit" | "yolo";
       },
     )
-    .option("-w, --work-dir <path>", "working directory for the agent");
+    .option("-w, --work-dir <path>", "working directory for the agent")
+    .option("-s, --session <id>", "session ID to resume")
+    .option("-c, --continue", "continue the last session");
 
   // Add config subcommand
   program.addCommand(createConfigCommand());
@@ -104,6 +109,15 @@ export async function runCli(argv: string[] = process.argv): Promise<void> {
       const approvalMode = opts.approvalMode;
       const workDir = opts.workDir || process.cwd();
 
+      // Resolve session to resume
+      let resumeSession: string | undefined;
+      if (opts.session) {
+        resumeSession = opts.session;
+      } else if (opts.continue) {
+        const last = await getLastSession();
+        resumeSession = last?.sessionId;
+      }
+
       // Non-interactive mode: Execute task directly when prompt is provided
       if (prompt) {
         const exitCode = await runNonInteractive(prompt, workDir, approvalMode);
@@ -114,6 +128,7 @@ export async function runCli(argv: string[] = process.argv): Promise<void> {
       const element = React.createElement(App, {
         cwd: workDir,
         approvalMode,
+        resumeSessionId: resumeSession,
       });
       const instance = render(element, {
         exitOnCtrlC: false,

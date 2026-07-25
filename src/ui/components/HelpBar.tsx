@@ -133,9 +133,24 @@ export function HelpBar({
                   {modeLabel}
                 </Text>
               )}
-              {modelName && <Text dimColor>{modelName}</Text>}
-              {dirName && <Text dimColor>{dirName}</Text>}
-              {gitBranch && <Text dimColor>{gitBranch}</Text>}
+              {modelName && (
+                <>
+                  <Text dimColor>•</Text>
+                  <Text dimColor>{modelName}</Text>
+                </>
+              )}
+              {dirName && (
+                <>
+                  <Text dimColor>•</Text>
+                  <Text dimColor>{dirName}</Text>
+                </>
+              )}
+              {gitBranch && (
+                <>
+                  <Text dimColor>•</Text>
+                  <Text dimColor>{gitBranch}</Text>
+                </>
+              )}
             </Box>
 
             {/* Right hint */}

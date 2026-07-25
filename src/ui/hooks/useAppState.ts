@@ -48,17 +48,15 @@ function updateMCPServers(
  */
 export type InteractiveMode =
   | null
-  | {
-      type: "login-provider";
-      providers: { id: string; name: string; baseURL?: string }[];
-    }
+  | { type: "login-provider"; providers: { id: string; name: string; baseURL?: string }[] }
   | { type: "login-key"; provider: { id: string; name: string; baseURL?: string } }
   | { type: "model-provider"; providers: { id: string; name: string }[] }
   | {
       type: "model-models";
       provider: { id: string; name: string };
       models: { id: string; name: string }[];
-    };
+    }
+  | { type: "sessions-list"; sessions: Session[] };
 
 export type AppState = {
   isLLMGenerating: boolean;
@@ -138,7 +136,13 @@ type Action =
   | { type: "UPDATE_TOKEN_USAGE"; tokenUsage: TokenUsage }
   | { type: "MCP_SERVER_UPDATE"; payload: MCPServerState }
   | { type: "SET_INTERACTIVE_MODE"; mode: InteractiveMode }
-  | { type: "CLEAR_INTERACTIVE_MODE" };
+  | { type: "CLEAR_INTERACTIVE_MODE" }
+  | {
+      type: "LOAD_SESSION";
+      sessionId: string;
+      messages: LLMMessage[];
+      title?: string;
+    };
 
 /**
  * State reducer for managing App state transitions.
@@ -510,6 +514,21 @@ function reducer(state: AppState, action: Action): AppState {
         interactiveMode: null,
       };
 
+    case "LOAD_SESSION":
+      return {
+        ...state,
+        sessionId: action.sessionId,
+        messages: action.messages,
+        toolCalls: [],
+        error: undefined,
+        tokenUsage: {
+          prompt_tokens: 0,
+          completion_tokens: 0,
+          total_tokens: 0,
+        },
+        clearNum: state.clearNum + 1,
+      };
+
     default:
       return state;
   }
@@ -834,6 +853,21 @@ export function useAppState(initialApprovalMode: ApprovalMode = "default") {
     clearInteractiveMode: useCallback(() => {
       dispatch({ type: "CLEAR_INTERACTIVE_MODE" });
     }, []),
+
+    /**
+     * Load a session from disk, replacing current messages.
+     */
+    loadSession: useCallback(
+      (sessionId: string, messages: LLMMessage[], title?: string) => {
+        dispatch({
+          type: "LOAD_SESSION",
+          sessionId,
+          messages,
+          title,
+        });
+      },
+      [],
+    ),
   };
 
   // Helper to build Session object for executor with token usage

@@ -2,6 +2,7 @@ import { execSync } from "child_process";
 import { useEffect, useCallback, useRef } from "react";
 import { useEffectEvent } from "use-effect-event";
 import { useApp, useInput } from "ink";
+import chalk from "chalk";
 
 import { executeAgent } from "../agent/executor";
 import type { ExecutionCallbacks } from "../agent/types";
@@ -21,10 +22,16 @@ import { CommandName, CommandCall } from "./commands";
 import { mcpService } from "../mcp";
 import { ConfigManager } from "../config";
 import { getAllProviders } from "../models/registry";
+import {
+  saveSession,
+  loadSession,
+  updateSessionMeta,
+} from "../sessions/persistence";
 
 export interface AppProps {
   cwd: string;
   approvalMode?: ApprovalMode;
+  resumeSessionId?: string;
 }
 
 /**
@@ -39,7 +46,7 @@ export interface AppProps {
  * - Double Ctrl+C exit with help message hint
  * - Session management
  */
-export function App({ cwd, approvalMode }: AppProps) {
+export function App({ cwd, approvalMode, resumeSessionId }: AppProps) {
   const { exit } = useApp();
 
   // Centralized state management via custom Hook
@@ -49,6 +56,43 @@ export function App({ cwd, approvalMode }: AppProps) {
   // Use useEffectEvent to prevent infinite re-renders
   const updateMCPServer = useEffectEvent(actions.updateMCPServer);
   const setError = useEffectEvent(actions.setError);
+  const loadSessionAction = useEffectEvent(actions.loadSession);
+
+  // Load resumed session on mount
+  useEffect(() => {
+    if (!resumeSessionId) return;
+    loadSession(resumeSessionId)
+      .then((session) => {
+        if (session) {
+          loadSessionAction(session.sessionId, session.messages, session.title);
+        }
+      })
+      .catch(() => {});
+  }, [resumeSessionId, loadSessionAction]);
+
+  // Save session after each LLM turn completes
+  const saveSessionAfterTurn = useCallback(async () => {
+    try {
+      const session = buildSession();
+      // Generate title from first user message if not set
+      let title = state.messages.find(
+        (m) => m.kind === "api" && m.message.role === "user",
+      );
+      if (title && typeof title.message.content === "string") {
+        const firstMsg = title.message.content;
+        const generatedTitle =
+          firstMsg.length > 50 ? firstMsg.slice(0, 47) + "..." : firstMsg;
+        await updateSessionMeta(session.sessionId, {
+          title: generatedTitle,
+          lastActivity: Date.now(),
+        });
+      } else {
+        await updateSessionMeta(session.sessionId, {
+          lastActivity: Date.now(),
+        });
+      }
+    } catch {}
+  }, [buildSession, state.messages]);
 
   // Initialize MCP connections on app start
   useEffect(() => {
@@ -193,6 +237,8 @@ export function App({ cwd, approvalMode }: AppProps) {
         };
         actions.completeCommandCall(completedCall);
       }
+      // Save session after shell command
+      await saveSessionAfterTurn();
       return;
     }
 
@@ -265,7 +311,17 @@ export function App({ cwd, approvalMode }: AppProps) {
       },
       callbacks,
     );
-  }, [actions, buildSession, getCurrentApprovalMode, cwd, refs.pendingApprovals]);
+
+    // Save session after turn
+    await saveSessionAfterTurn();
+  }, [
+    actions,
+    buildSession,
+    getCurrentApprovalMode,
+    cwd,
+    refs.pendingApprovals,
+    saveSessionAfterTurn,
+  ]);
 
   // Execute prompt when set by commands (like /init)
   useEffect(() => {
@@ -356,6 +412,19 @@ export function App({ cwd, approvalMode }: AppProps) {
   );
 
   const handleExit = async (): Promise<void> => {
+    // Save session before exit
+    try {
+      const session = buildSession();
+      await saveSession(session);
+    } catch {}
+
+    // Print resume message
+    console.log(
+      chalk.gray(
+        `To resume this session, run sara -s ${state.sessionId} or continue with sara -c`,
+      ),
+    );
+
     // Gracefully shutdown MCP connections before exit
     await mcpService.shutdown();
     exit();

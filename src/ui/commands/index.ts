@@ -6,6 +6,7 @@ import { initCommand } from "./initCommand";
 import { loginCommand } from "./loginCommand";
 import { mcpCommand } from "./mcpCommand";
 import { modelCommand } from "./modelCommand";
+import { sessionsCommand } from "./sessionsCommand";
 import { statusCommand } from "./statusCommand";
 import { updateCommand } from "./updateCommand";
 
@@ -23,6 +24,7 @@ export const ALL_COMMANDS = [
   loginCommand,
   mcpCommand,
   modelCommand,
+  sessionsCommand,
   statusCommand,
   updateCommand,
 ] as const;

@@ -472,8 +472,8 @@ export function PromptInput({
       const currentCursor = cursorRef.current;
 
       // Handle special keys
-      if (key.meta && key.return) {
-        // Option+Enter: Insert newline
+      if ((key.meta && key.return) || (key.shift && key.return)) {
+        // Option+Enter or Shift+Enter: Insert newline
         const nextValue =
           currentValue.slice(0, currentCursor) +
           "\n" +
@@ -515,7 +515,13 @@ export function PromptInput({
       let nextCursor = currentCursor;
       let nextValue = currentValue;
 
-      if (key.leftArrow) {
+      // Home: move cursor to start (or position 1 in shell mode)
+      if (key.home) {
+        nextCursor = shellMode ? 1 : 0;
+      } else if (key.end) {
+        // End: move cursor to end
+        nextCursor = currentValue.length;
+      } else if (key.leftArrow) {
         nextCursor = shellMode
           ? Math.max(1, currentCursor - 1)
           : Math.max(0, currentCursor - 1);

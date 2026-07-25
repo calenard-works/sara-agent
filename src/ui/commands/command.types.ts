@@ -20,6 +20,7 @@ export type CommandName =
   | "/mcp"
   | "/login"
   | "/model"
+  | "/sessions"
   | "/shell"
   | "/status"
   | "/update"
