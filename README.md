@@ -1,37 +1,32 @@
-# Sara
+# sara-agent
 
-An educational AI coding assistant project that helps you understand and hack modern AI coding assistant systems.
+An AI coding assistant agent that helps you understand and modify codebases through natural language conversations.
 
-## 🌟 Why Sara?
+## Features
 
-![Demo](./demo.png)
+- **Multi-LLM Support** - Compatible with OpenAI APIs, including GLM, DeepSeek, and other mainstream models
+- **Complete Tool System** - Unified interface with tools for file operations, search, and command execution
+- **MCP Integration** - Connect to external MCP servers for extended functionality
+- **Agent Loop** - Complete LLM workflow with streaming responses and human-in-the-loop permission approval
+- **Modern UI** - React/Ink-based terminal interface with theme support
 
-Sara is an **educational project** designed to help developers understand modern Coding Agent architecture. We strike the perfect balance between overly complex open-source projects and simplistic demo examples, offering a complete yet manageable implementation (14K lines of production code) with:
+## Quick Start
 
-- **📚 Education-First Design** - Clean architecture built on OpenAI SDK with thoughtful type design and comprehensive comments
-- **🛠️ Complete Tool System** - Unified interface with comprehensive tools for file operations, search, and command execution
-- **🔌 MCP Integration** - Connect to external MCP servers for extended functionality
-- **⚙️ Multi-LLM Support** - Compatible with OpenAI APIs, including GLM, DeepSeek, and other mainstream models
-- **🤖 Agent Loop** - Complete LLM workflow with streaming responses and human-in-the-loop permission approval
-- **🎨 Modern UI** - React/Ink-based terminal interface with theme support
-
-## 🚀 Quick Start (Install & Use)
-
-### Install Globally
+### Install
 
 ```bash
-npm install -g sara
+npm install -g sara-agent
 ```
 
 ### Set Up API Key
 
-**DeepSeek** (tested and verified):
+**DeepSeek**:
 
 ```bash
 export DEEPSEEK_API_KEY="your-deepseek-api-key"
 ```
 
-**Or use GLM (智谱AI)** (tested and verified):
+**Or use GLM (智谱AI)**:
 
 ```bash
 export GLM_API_KEY="your-glm-api-key"
@@ -42,64 +37,38 @@ export GLM_API_KEY="your-glm-api-key"
 ```bash
 export OPENAI_API_KEY="your-openai-api-key"
 # or
-SARA_API_KEY="your-api-key"
-SARA_BASE_URL="https://your-api-provider.com/v1"
-SARA_MODEL="your-model-name"
+export SARA_API_KEY="your-api-key"
+export SARA_BASE_URL="https://your-api-provider.com/v1"
+export SARA_MODEL="your-model-name"
 ```
 
-### Run Sara
+### Run
 
 ```bash
 # Interactive mode (launch UI)
-sara
+sara-agent
 
 # Non-interactive mode (direct execution)
-sara "help me fix the bug in auth.ts"
+sara-agent "help me fix the bug in auth.ts"
 ```
 
-## 🔧 Development Quick Start
+## Development
 
 ### Prerequisites
 
 - **Bun**
 - **pnpm**
 
-### Install Dependencies
+### Commands
 
 ```bash
-pnpm install
+pnpm install       # Install dependencies
+pnpm run dev       # Development mode with file watching
+pnpm run build     # Build
+pnpm run test      # Run tests
 ```
 
-### Development Commands
-
-```bash
-# Development mode with file watching
-pnpm run dev
-
-# Build
-pnpm run build
-
-# Test
-pnpm run test
-```
-
-## 📖 Learning Resources
-
-Want to dive deeper into the system architecture? Check out [docs/README.md](./docs/README.md) for complete system documentation and architecture explanations.
-
-### 📚 Project Analysis
-
-For a comprehensive code analysis and walkthrough, visit [**Sara Deep Analysis**](https://deepwiki.com/minmaxflow/sara/1-overview) - an in-depth exploration of the codebase architecture, design patterns, and implementation details.
-
-## 🧠 Project Memory
-
-Sara automatically uses `AGENTS.md` file in your project root to provide context-aware assistance:
-
-- **Automatic Context**: System reads `AGENTS.md` to understand your project
-- **Customizable**: Edit `AGENTS.md` to include project-specific information
-- **Persistent Memory**: Maintains project context across sessions
-
-## 🏗️ Project Structure
+## Project Structure
 
 ```
 src/
@@ -114,7 +83,7 @@ src/
 └── utils/          # Shared utilities
 ```
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **TypeScript** - Static type checking
 - **pnpm** - Package management
@@ -123,23 +92,3 @@ src/
 - **Vitest** - Testing framework
 - **Zod** - Runtime type validation
 - **Commander** - CLI framework
-
-## 🚧 Future Plans
-
-1. **Session Persistence and Resume** - Save and restore agent sessions
-2. **LLM Built-in Tool Integration** - Support for LLM's native tool capabilities (note: DeepSeek currently doesn't support web search tools)
-3. **Image Input Support** - Process and analyze image inputs
-4. **Sub Agents Functionality** - Hierarchical agent delegation
-5. **Reasoning Model Support** - Integration with reasoning-focused models
-6. **Tool Call Message Streaming** - Real-time streaming of tool execution
-7. **Context Caching** - Smart caching of conversation context to reduce token usage
-
-## 📚 References
-
-This project was inspired by and references the following resources:
-
-- **[Building an Agent](https://ampcode.com/how-to-build-an-agent)** - Guide on building AI agents
-- **[Building an Agentic System](https://gerred.github.io/building-an-agentic-system/index.html)** - Comprehensive guide to building agentic systems
-- **[System and Tool Prompts](https://gist.github.com/transitive-bullshit/487c9cb52c75a9701d312334ed53b20c)** - System prompts and tool prompts for coding agent
-- **[Neovate Code](https://github.com/neovateai/neovate-code)** - Todo tool prompt
-- **[Claude Code](https://claude.ai/code)** - UX reference for CLI interface design
