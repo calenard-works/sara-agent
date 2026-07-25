@@ -10,7 +10,7 @@
     "LICENSE"
   ],
   "bin": {
-    "sara-agent": "dist/index.mjs"
+    "sara": "dist/index.mjs"
   },
   "repository": {
     "type": "git",

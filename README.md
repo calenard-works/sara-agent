@@ -46,26 +46,10 @@ export SARA_MODEL="your-model-name"
 
 ```bash
 # Interactive mode (launch UI)
-sara-agent
+sara
 
 # Non-interactive mode (direct execution)
-sara-agent "help me fix the bug in auth.ts"
-```
-
-## Development
-
-### Prerequisites
-
-- **Bun**
-- **pnpm**
-
-### Commands
-
-```bash
-pnpm install       # Install dependencies
-pnpm run dev       # Development mode with file watching
-pnpm run build     # Build
-pnpm run test      # Run tests
+sara "help me fix the bug in auth.ts"
 ```
 
 ## Project Structure
@@ -82,13 +66,3 @@ src/
 ├── sessions/       # Session management
 └── utils/          # Shared utilities
 ```
-
-## Tech Stack
-
-- **TypeScript** - Static type checking
-- **pnpm** - Package management
-- **Ink** - React terminal UI
-- **OpenAI SDK** - LLM integration (supports DeepSeek/OpenAI/compatible APIs)
-- **Vitest** - Testing framework
-- **Zod** - Runtime type validation
-- **Commander** - CLI framework
