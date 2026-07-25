@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.1 (2026-07-25)
+
+- Fix infinite re-render loop on startup (first-run detection)
+
 ## 0.2.0 (2026-07-25)
 
 - Version display in TUI status bar (gray)
