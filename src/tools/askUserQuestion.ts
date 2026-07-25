@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { Tool, ToolErrorResult, ToolExecutionContext } from "./types";
+import { requestQuestion } from "../permissions/questionRequest";
 
 const QuestionOptionSchema = z.object({
   label: z.string().min(1).describe("Option label shown to the user"),
@@ -85,26 +86,29 @@ FEATURES:
     }
 
     try {
-      const { background = false } = input;
+      const { questions, background = false } = input;
 
-      if (background) {
-        // Simplified background mode: return a placeholder task id.
-        // In a full implementation, this would dispatch the question to a
-        // background question queue and return a real task id for polling.
-        return {
-          answers: {
-            _backgroundTaskId: `bg_q_${Date.now()}`,
-          },
-        };
-      }
+      // Set up abort handler: if the signal fires while we're waiting,
+      // we need to throw so the promise rejection is caught below.
+      const waitPromise = requestQuestion(questions, background);
 
-      // Foreground question infrastructure is not yet available.
-      // The caller should use background=true or handle this error gracefully.
-      return {
-        isError: true,
-        message: "Question infrastructure not available in this version",
-      };
+      const answers = await Promise.race([
+        waitPromise,
+        new Promise<never>((_, reject) => {
+          if (!context.signal) return;
+          const onAbort = () => {
+            context.signal!.removeEventListener("abort", onAbort);
+            reject(new Error("Aborted"));
+          };
+          context.signal.addEventListener("abort", onAbort);
+        }),
+      ]);
+
+      return { answers };
     } catch (error) {
+      if (error instanceof Error && error.message === "Aborted") {
+        return { isError: true, isAborted: true, message: "Aborted" };
+      }
       return {
         isError: true,
         message: `AskUserQuestion failed: ${error instanceof Error ? error.message : "Unknown error"}`,

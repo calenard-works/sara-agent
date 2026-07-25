@@ -15,6 +15,11 @@ import {
   requestUserApproval,
   resolveApproval,
 } from "../permissions/permissionRequest";
+import {
+  subscribe as subscribeQuestions,
+  resolveQuestion,
+  rejectQuestion,
+} from "../permissions/questionRequest";
 import { Layout } from "./components/Layout";
 import { useAppState } from "./hooks/useAppState";
 import { createClient } from "../llm/client";
@@ -101,6 +106,15 @@ export function App({ cwd, approvalMode, resumeSessionId }: AppProps) {
       setError(error instanceof Error ? error.message : String(error));
     });
   }, [cwd, updateMCPServer, setError]);
+
+  // Subscribe to AskUserQuestion events
+  const setPendingQuestion = useEffectEvent(actions.setPendingQuestion);
+  useEffect(() => {
+    const unsub = subscribeQuestions((event) => {
+      setPendingQuestion(event);
+    });
+    return unsub;
+  }, [setPendingQuestion]);
 
   // First-run detection: check if any API keys are configured
   const firstRunDone = useRef(false);
@@ -423,6 +437,28 @@ export function App({ cwd, approvalMode, resumeSessionId }: AppProps) {
     [state.messages, actions, handleSubmit, cwd],
   );
 
+  /**
+   * Handle user answering a question from AskUserQuestion tool.
+   */
+  const handleQuestionAnswer = useCallback(
+    (id: string, answers: Record<string, string>) => {
+      resolveQuestion(id, answers);
+      actions.clearPendingQuestion();
+    },
+    [actions],
+  );
+
+  /**
+   * Handle user cancelling/dismissing a question.
+   */
+  const handleQuestionCancel = useCallback(
+    (id: string) => {
+      rejectQuestion(id, "User cancelled");
+      actions.clearPendingQuestion();
+    },
+    [actions],
+  );
+
   const handleExit = async (): Promise<void> => {
     // Save session before exit
     try {
@@ -454,6 +490,8 @@ export function App({ cwd, approvalMode, resumeSessionId }: AppProps) {
       onCycleApprovalMode={actions.cycleApprovalMode}
       isAgentExecuting={isAgentExecuting}
       onExecuteCommand={handleExecuteCommand}
+      onQuestionAnswer={handleQuestionAnswer}
+      onQuestionCancel={handleQuestionCancel}
     />
   );
 }

@@ -19,6 +19,7 @@ import { formatToolResultMessage } from "../../agent/formatters";
 import { CommandCall } from "../commands";
 import type { MCPServerState } from "../../mcp/client";
 import type { TodoItem } from "../../tools/types";
+import type { NewQuestionEvent } from "../../permissions/questionRequest";
 
 // Simplified MCP state updates
 function updateMCPServers(
@@ -104,6 +105,9 @@ export type AppState = {
 
   /** Whether plan mode is active (agent only plans, no tool execution) */
   isPlanMode: boolean;
+
+  /** Active pending question from AskUserQuestion tool — null when none */
+  pendingQuestion: NewQuestionEvent | null;
 };
 
 /**
@@ -151,6 +155,8 @@ type Action =
   | { type: "REFRESH_MODEL" }
   | { type: "TOGGLE_PLAN_MODE" }
   | { type: "UPDATE_TODOS"; todos: TodoItem[] }
+  | { type: "SET_PENDING_QUESTION"; pendingQuestion: NewQuestionEvent }
+  | { type: "CLEAR_PENDING_QUESTION" }
   | {
       type: "LOAD_SESSION";
       sessionId: string;
@@ -502,6 +508,7 @@ function reducer(state: AppState, action: Action): AppState {
           total_tokens: 0,
         },
         clearNum: state.clearNum + 1,
+        pendingQuestion: null,
       };
 
     case "MCP_SERVER_UPDATE":
@@ -544,6 +551,18 @@ function reducer(state: AppState, action: Action): AppState {
       return {
         ...state,
         todos: action.todos,
+      };
+
+    case "SET_PENDING_QUESTION":
+      return {
+        ...state,
+        pendingQuestion: action.pendingQuestion,
+      };
+
+    case "CLEAR_PENDING_QUESTION":
+      return {
+        ...state,
+        pendingQuestion: null,
       };
 
     case "LOAD_SESSION":
@@ -673,6 +692,7 @@ export function useAppState(initialApprovalMode: ApprovalMode = "default") {
     modelRefreshKey: 0,
     isPlanMode: false,
     todos: [],
+    pendingQuestion: null,
   });
 
   const abortRef = useRef<AbortController | null>(null);
@@ -908,6 +928,23 @@ export function useAppState(initialApprovalMode: ApprovalMode = "default") {
      */
     updateTodos: useCallback((todos: TodoItem[]) => {
       dispatch({ type: "UPDATE_TODOS", todos });
+    }, []),
+
+    /**
+     * Set the pending question for the UI to display.
+     */
+    setPendingQuestion: useCallback(
+      (pendingQuestion: NewQuestionEvent) => {
+        dispatch({ type: "SET_PENDING_QUESTION", pendingQuestion });
+      },
+      [],
+    ),
+
+    /**
+     * Clear the pending question (after user answers or cancels).
+     */
+    clearPendingQuestion: useCallback(() => {
+      dispatch({ type: "CLEAR_PENDING_QUESTION" });
     }, []),
 
     /**

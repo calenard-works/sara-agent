@@ -17,7 +17,12 @@ import { getCurrentTheme } from "../theme";
 import { ProviderSelector } from "./ProviderSelector";
 import { KeyInput } from "./KeyInput";
 import { SessionList } from "./SessionList";
+import { QuestionView } from "./QuestionView";
 import { TodoWidget } from "./TodoWidget";
+import {
+  resolveQuestion,
+  rejectQuestion,
+} from "../../permissions/questionRequest";
 import { fetchAllProviderModels } from "../../models/registry";
 
 export interface LayoutProps {
@@ -31,6 +36,8 @@ export interface LayoutProps {
   onCycleApprovalMode: () => void; // Handler for cycling approval mode
   isAgentExecuting?: boolean; // Whether agent is currently executing
   onExecuteCommand: (command: CommandName, args?: string) => Promise<void>;
+  onQuestionAnswer: (id: string, answers: Record<string, string>) => void;
+  onQuestionCancel: (id: string) => void;
 }
 
 /**
@@ -61,6 +68,8 @@ export function Layout({
   onCycleApprovalMode,
   isAgentExecuting = false,
   onExecuteCommand,
+  onQuestionAnswer,
+  onQuestionCancel,
 }: LayoutProps) {
   const [dotIndex, setDotIndex] = useState(0);
   const dots = useMemo(() => ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"], []);
@@ -453,8 +462,19 @@ export function Layout({
         {/* Interactive mode UI */}
         {isInInteractiveMode && renderInteractiveMode()}
 
-        {/* Normal prompt input - hidden during interactive mode */}
-        {!hasPermissionRequest && !isInInteractiveMode && (
+        {/* Pending question from AskUserQuestion tool */}
+        {state.pendingQuestion && !isInInteractiveMode && (
+          <Box marginTop={1}>
+            <QuestionView
+              questionEvent={state.pendingQuestion}
+              onAnswer={onQuestionAnswer}
+              onCancel={onQuestionCancel}
+            />
+          </Box>
+        )}
+
+        {/* Normal prompt input - hidden during interactive mode, permission, or question */}
+        {!hasPermissionRequest && !isInInteractiveMode && !state.pendingQuestion && (
           <Box marginTop={1} flexDirection="column">
             <PromptInput
               onSubmit={onSubmit}
