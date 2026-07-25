@@ -248,6 +248,24 @@ export function PromptInput({
     },
   });
 
+  // Handle double Ctrl+D to exit
+  useDoubleKeyPress((input, key) => key.ctrl && input === "d", {
+    windowMs: 1000,
+    onFirstPress: () => {
+      setEscTips("press ctrl+d again to exit");
+
+      if (escTipsTimeoutRef.current) clearTimeout(escTipsTimeoutRef.current);
+
+      escTipsTimeoutRef.current = setTimeout(() => {
+        setEscTips(undefined);
+        escTipsTimeoutRef.current = null;
+      }, 1000);
+    },
+    onDoublePress: () => {
+      onExit();
+    },
+  });
+
   // @mention context calculation using refs
   const mentionContext = useMemo(() => {
     return calculateMentionContext(
