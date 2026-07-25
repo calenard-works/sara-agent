@@ -127,11 +127,44 @@ export function Layout({
     return () => controller.abort();
   }, []);
 
-  const logo = useMemo(() => {
-    let modelName = "unknown";
+  // Resolve human-readable model name
+  const [modelDisplayName, setModelDisplayName] = useState<string>("");
+  useEffect(() => {
+    let cancelled = false;
+    const modelId = ConfigManager.load().llm.model;
+    const providerId = ConfigManager.getProvider();
+    if (!modelId || !providerId) {
+      setModelDisplayName("");
+      return;
+    }
+    // Try to resolve from registry
+    import("../../models/registry")
+      .then(({ fetchAllProviderModels }) =>
+        fetchAllProviderModels(providerId),
+      )
+      .then((models) => {
+        if (cancelled) return;
+        const found = models.find((m) => m.id === modelId);
+        setModelDisplayName(found?.name || modelId);
+      })
+      .catch(() => {
+        if (!cancelled) setModelDisplayName(modelId);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Check if user has any provider configured
+  const hasProvider = useMemo(() => {
     try {
-      modelName = ConfigManager.load().llm.model;
-    } catch {}
+      return !!ConfigManager.getProvider();
+    } catch {
+      return false;
+    }
+  }, []);
+
+  const logo = useMemo(() => {
     return (
       <Box flexDirection="column">
         <Logo />
@@ -139,7 +172,16 @@ export function Layout({
           <Text dimColor>{cwd}</Text>
         </Box>
         <Box>
-          <Text dimColor>{modelName}</Text>
+          {hasProvider && modelDisplayName ? (
+            <Text dimColor>{modelDisplayName}</Text>
+          ) : (
+            <Text dimColor>
+              not signed, run{" "}
+              <Text bold color={getCurrentTheme().secondary}>
+                /login
+              </Text>
+            </Text>
+          )}
         </Box>
         <Box marginTop={1}>
           <Text dimColor>
@@ -150,7 +192,7 @@ export function Layout({
         </Box>
       </Box>
     );
-  }, [cwd]);
+  }, [cwd, hasProvider, modelDisplayName]);
 
   // Interactive mode handlers
   const handleLoginProviderSelect = useCallback(
@@ -350,6 +392,7 @@ export function Layout({
               state={state}
               actions={actions}
               onExecuteCommand={onExecuteCommand}
+              modelName={modelDisplayName}
             />
           </Box>
         )}

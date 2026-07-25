@@ -1,53 +1,10 @@
+import { execSync } from "child_process";
+import { useMemo } from "react";
 import { Box, Text } from "ink";
 
 import type { ApprovalMode } from "../../config";
 import type { MCPServerState } from "../../mcp/client";
 import { getCurrentTheme } from "../theme";
-
-// MCP status indicator component
-interface MCPStatusProps {
-  mcp: MCPServerState[];
-}
-
-function MCPStatus({ mcp }: MCPStatusProps) {
-  if (mcp.length === 0) {
-    return null;
-  }
-
-  const connected = mcp.filter((s) => s.status === "connected").length;
-  const connecting = mcp.filter((s) => s.status === "connecting").length;
-  const error = mcp.filter((s) => s.status === "error").length;
-
-  return (
-    <Box flexDirection="row" alignItems="center" gap={1}>
-      <Text dimColor>MCP:</Text>
-      {connected > 0 && (
-        <Box flexDirection="row" alignItems="center" gap={1}>
-          <Text dimColor color={getCurrentTheme().success}>
-            •
-          </Text>
-          <Text dimColor>{connected}</Text>
-        </Box>
-      )}
-      {connecting > 0 && (
-        <Box flexDirection="row" alignItems="center" gap={1}>
-          <Text dimColor color={getCurrentTheme().warning}>
-            •
-          </Text>
-          <Text dimColor>{connecting}</Text>
-        </Box>
-      )}
-      {error > 0 && (
-        <Box flexDirection="row" alignItems="center" gap={1}>
-          <Text dimColor color={getCurrentTheme().error}>
-            •
-          </Text>
-          <Text dimColor>{error}</Text>
-        </Box>
-      )}
-    </Box>
-  );
-}
 
 // Token usage color thresholds (percentage of 128K context window)
 const TOKEN_COLOR_THRESHOLDS = {
@@ -55,23 +12,30 @@ const TOKEN_COLOR_THRESHOLDS = {
   ERROR: 115000, // 90% of 128K
 } as const;
 
+const DEFAULT_CONTEXT_LIMIT = 128_000;
+
 export interface HelpBarProps {
-  message?: string; // current message to show
-  approvalMode?: ApprovalMode; // current approval mode
+  message?: string;
+  approvalMode?: ApprovalMode;
   helpMode?: boolean;
-  mcp?: MCPServerState[]; // MCP servers state
+  mcp?: MCPServerState[];
   tokenUsage?: {
     total_tokens: number;
   };
+  modelName?: string;
+  cwd?: string;
 }
 
 const getStatusMessage = (approvalMode?: ApprovalMode) => {
-  if (approvalMode === "autoEdit") {
-    return "⏵⏵ accept edits on ";
-  } else if (approvalMode === "yolo") {
-    return "⏵⏵ bypass permissions on ";
-  }
-  return ""; // default mode shows nothing
+  if (approvalMode === "autoEdit") return "autoEdit";
+  if (approvalMode === "yolo") return "yolo";
+  return "default";
+};
+
+const getStatusColor = (approvalMode?: ApprovalMode) => {
+  if (approvalMode === "yolo") return getCurrentTheme().error;
+  if (approvalMode === "autoEdit") return getCurrentTheme().warning;
+  return undefined;
 };
 
 export function HelpBar({
@@ -80,15 +44,21 @@ export function HelpBar({
   helpMode = false,
   mcp = [],
   tokenUsage,
+  modelName,
+  cwd,
 }: HelpBarProps) {
-  const statusMessage = getStatusMessage(approvalMode);
-
-  // Determine what to show on the right side
-  const rightContent = message ? (
-    <Text dimColor>{message}</Text>
-  ) : (
-    <MCPStatus mcp={mcp} />
-  );
+  // Git branch detection
+  const gitBranch = useMemo(() => {
+    try {
+      const branch = execSync(
+        "git rev-parse --abbrev-ref HEAD 2>/dev/null || true",
+        { encoding: "utf-8", timeout: 2000 },
+      ).trim();
+      return branch || undefined;
+    } catch {
+      return undefined;
+    }
+  }, []);
 
   // Format token display
   const formatTokenDisplay = (tokens: number): string => {
@@ -97,14 +67,24 @@ export function HelpBar({
   };
 
   const getTokenColor = (tokens: number): string | undefined => {
-    if (tokens < TOKEN_COLOR_THRESHOLDS.WARNING) return undefined; // < 80% - green
-    if (tokens < TOKEN_COLOR_THRESHOLDS.ERROR) return getCurrentTheme().warning; // 80-90% - yellow
-    return getCurrentTheme().error; // > 90% - red
+    if (tokens < TOKEN_COLOR_THRESHOLDS.WARNING) return undefined;
+    if (tokens < TOKEN_COLOR_THRESHOLDS.ERROR)
+      return getCurrentTheme().warning;
+    return getCurrentTheme().error;
   };
 
-  const tokenDisplay = tokenUsage
-    ? `${formatTokenDisplay(tokenUsage.total_tokens)}/128K`
+  const tokenTotal = tokenUsage?.total_tokens || 0;
+  const contextLimit = DEFAULT_CONTEXT_LIMIT;
+  const contextPercent = Math.round((tokenTotal / contextLimit) * 100);
+  const tokenColor = getTokenColor(tokenTotal);
+  const tokenDisplay = tokenTotal
+    ? `${formatTokenDisplay(tokenTotal)}/${formatTokenDisplay(contextLimit)}`
     : null;
+
+  // Basename of cwd
+  const dirName = cwd
+    ? cwd.split("/").filter(Boolean).pop() || cwd
+    : undefined;
 
   // Detailed help items in two columns
   const detailedHelpItems = [
@@ -114,9 +94,11 @@ export function HelpBar({
     ["ctrl + e to open external editor", ""],
   ];
 
+  const modeLabel = getStatusMessage(approvalMode);
+  const modeColor = getStatusColor(approvalMode);
+
   return (
     <Box width="100%" flexDirection="column" paddingX={1}>
-      {/* Help mode - full screen help */}
       {helpMode ? (
         <Box width="100%" flexDirection="column">
           {detailedHelpItems.map((row, rowIndex) => (
@@ -135,38 +117,76 @@ export function HelpBar({
             </Box>
           ))}
         </Box>
+      ) : message ? (
+        /* Temporary message shown (e.g. escTips) */
+        <Box width="100%" flexDirection="row" justifyContent="center">
+          <Text dimColor>{message}</Text>
+        </Box>
       ) : (
         <>
-          {/* Main help bar */}
+          {/* === First line: left items (mode model dir branch) + right hint === */}
           <Box width="100%" flexDirection="row" justifyContent="space-between">
-            <Box flexShrink={0} marginRight={2}>
-              {statusMessage && (
-                <Text
-                  color={
-                    approvalMode === "autoEdit"
-                      ? getCurrentTheme().warning
-                      : approvalMode === "yolo"
-                        ? getCurrentTheme().error
-                        : undefined
-                  }
-                >
-                  {statusMessage}
+            {/* Left cluster */}
+            <Box flexDirection="row" alignItems="center" gap={1}>
+              {modeLabel !== "default" && (
+                <Text color={modeColor} bold>
+                  {modeLabel}
                 </Text>
               )}
-              <Text dimColor>? for shortcuts</Text>
+              {modelName && <Text dimColor>{modelName}</Text>}
+              {dirName && <Text dimColor>{dirName}</Text>}
+              {gitBranch && <Text dimColor>{gitBranch}</Text>}
             </Box>
-            <Box flexGrow={1} justifyContent="flex-end" marginLeft={2}>
-              <Box flexDirection="row" alignItems="center" gap={2}>
-                {rightContent}
-                {tokenDisplay && (
-                  <Text
-                    dimColor
-                    color={getTokenColor(tokenUsage!.total_tokens)}
-                  >
-                    {tokenDisplay}
-                  </Text>
-                )}
-              </Box>
+
+            {/* Right hint */}
+            <Text dimColor>shift+enter: newline</Text>
+          </Box>
+
+          {/* === Second line: MCP / context usage === */}
+          <Box width="100%" flexDirection="row" justifyContent="space-between">
+            <Box flexDirection="row" alignItems="center" gap={1}>
+              {/* MCP indicators */}
+              {mcp.length > 0 &&
+                (() => {
+                  const connected = mcp.filter(
+                    (s) => s.status === "connected",
+                  ).length;
+                  const connecting = mcp.filter(
+                    (s) => s.status === "connecting",
+                  ).length;
+                  const errorState = mcp.filter(
+                    (s) => s.status === "error",
+                  ).length;
+                  return (
+                    <>
+                      {connected > 0 && (
+                        <Text dimColor color={getCurrentTheme().success}>
+                          • MCP {connected}
+                        </Text>
+                      )}
+                      {connecting > 0 && (
+                        <Text dimColor color={getCurrentTheme().warning}>
+                          • MCP {connecting}
+                        </Text>
+                      )}
+                      {errorState > 0 && (
+                        <Text dimColor color={getCurrentTheme().error}>
+                          • MCP {errorState}
+                        </Text>
+                      )}
+                    </>
+                  );
+                })()}
+            </Box>
+
+            {/* Right: context usage */}
+            <Box flexDirection="row" alignItems="center" gap={1}>
+              <Text dimColor>
+                context:{" "}
+                <Text color={tokenColor}>
+                  {contextPercent}% ({tokenDisplay})
+                </Text>
+              </Text>
             </Box>
           </Box>
         </>

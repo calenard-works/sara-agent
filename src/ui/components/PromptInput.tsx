@@ -60,6 +60,7 @@ export interface PromptInputProps {
   state: AppState;
   actions: AppActions;
   onExecuteCommand: (command: CommandName, args?: string) => Promise<void>;
+  modelName?: string;
 }
 
 export function PromptInput({
@@ -72,6 +73,7 @@ export function PromptInput({
   state,
   actions,
   onExecuteCommand,
+  modelName,
 }: PromptInputProps) {
   const [mentionMode, setMentionMode] = useState<boolean>(false);
   const [selectedMentionFileIndex, setSelectedMentionFileIndex] =
@@ -647,6 +649,8 @@ export function PromptInput({
           mcp={state.mcp}
           message={escTips}
           tokenUsage={state.tokenUsage}
+          modelName={modelName}
+          cwd={cwd}
         />
       )}
     </Box>
