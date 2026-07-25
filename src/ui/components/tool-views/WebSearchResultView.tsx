@@ -1,5 +1,7 @@
 import { Box, Text } from "ink";
 
+import { getCurrentTheme } from "../../theme";
+
 interface SearchResult {
   title: string;
   url: string;
@@ -39,7 +41,7 @@ export function WebSearchResultView({ result }: WebSearchResultViewProps) {
       {results.map((r, idx) => (
         <Box key={idx} flexDirection="column" marginBottom={1}>
           <Text>
-            <Text bold color="cyan">
+            <Text bold color={getCurrentTheme().primary}>
               {idx + 1}.
             </Text>
             {' '}
@@ -47,7 +49,7 @@ export function WebSearchResultView({ result }: WebSearchResultViewProps) {
           </Text>
           <Text dimColor>{r.url}</Text>
           {r.snippet && (
-            <Text color="gray">{r.snippet}</Text>
+            <Text color={getCurrentTheme().textMuted}>{r.snippet}</Text>
           )}
         </Box>
       ))}

@@ -1,5 +1,7 @@
 import { Box, Text } from "ink";
 
+import { getCurrentTheme } from "../../theme";
+
 export interface ReadMediaFileResultViewProps {
   result: {
     path: string;
@@ -16,7 +18,7 @@ export function ReadMediaFileResultView({ result }: ReadMediaFileResultViewProps
   return (
     <Box flexDirection="column">
       <Box marginBottom={1}>
-        <Text bold color="blue">
+        <Text bold color={getCurrentTheme().primary}>
           {path}
         </Text>
       </Box>

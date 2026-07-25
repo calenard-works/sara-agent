@@ -1,6 +1,6 @@
 {
   "name": "sara-agent",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "description": "sara-agent - AI Coding Agent",
   "type": "module",
   "files": [

@@ -1,5 +1,6 @@
 import { Box, Text } from "ink";
 
+import { getCurrentTheme } from "../../theme";
 import type { FetchSuccess } from "../../../tools/types";
 
 export interface FetchResultViewProps {
@@ -17,7 +18,7 @@ export function FetchResultView({ result }: FetchResultViewProps) {
     return (
       <Box flexDirection="column">
         <Box flexDirection="column" marginBottom={1}>
-          <Text bold color="blue">
+          <Text bold color={getCurrentTheme().primary}>
             {url}
           </Text>
         </Box>
@@ -34,7 +35,7 @@ export function FetchResultView({ result }: FetchResultViewProps) {
   return (
     <Box flexDirection="column">
       <Box flexDirection="column" marginBottom={1}>
-        <Text bold color="blue">
+        <Text bold color={getCurrentTheme().primary}>
           {url}
         </Text>
       </Box>

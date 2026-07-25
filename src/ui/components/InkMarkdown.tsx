@@ -8,10 +8,17 @@ export interface InkMarkdownProps {
 }
 
 /**
- * Simple markdown renderer for Ink using marked
- * Supports only basic formatting: bold, italic, code blocks, lists, headings, blockquotes, links
- * Does not support: tables, images, task lists, strikethrough, and other complex formats
- * Also does not support nesting of basic formats (e.g., bold inside italic, links in headers, etc.)
+ * Markdown renderer for Ink using marked.
+ *
+ * Color scheme adapted from Kimi Code's MarkdownTheme:
+ * - Headings: bold + primary color (h1 also underlined)
+ * - Links: primary color, underlined
+ * - Inline code: primary color
+ * - Code blocks: green text with textMuted borders
+ * - Blockquotes: textDim color, italic with textDim border
+ * - Horizontal rules: border color
+ * - List bullets: text color with • for unordered lists
+ * - Bold/italic/strikethrough/underline: standard text decorations
  */
 export function InkMarkdown({ children }: InkMarkdownProps) {
   const tokens = marked.lexer(children);
@@ -31,12 +38,19 @@ function renderToken(
   isLast: boolean = false,
 ): React.ReactNode {
   const marginBottom = isLast ? 0 : 1;
+  const theme = getCurrentTheme();
 
   switch (token.type) {
     case "heading":
       return (
         <Box key={key} marginBottom={token.depth <= 3 ? 1 : 0}>
-          <Text bold>{token.text}</Text>
+          <Text bold color={theme.primary}>
+            {token.depth === 1 ? (
+              <Text underline>{token.text}</Text>
+            ) : (
+              token.text
+            )}
+          </Text>
         </Box>
       );
 
@@ -54,10 +68,10 @@ function renderToken(
           marginBottom={marginBottom}
           flexDirection="column"
           borderStyle="round"
-          borderColor={getCurrentTheme().secondary}
+          borderColor={theme.textMuted}
           paddingX={1}
         >
-          <Text color={getCurrentTheme().accent}>{token.text}</Text>
+          <Text color={theme.success}>{token.text}</Text>
         </Box>
       );
 
@@ -66,7 +80,6 @@ function renderToken(
         <Box key={key} marginBottom={marginBottom} flexDirection="column">
           {token.items.map((item: Tokens.ListItem, i: number) => {
             // List items can have complex nested tokens structure
-            // We need to handle the case where the first token is a text token with nested tokens
             let content: React.ReactNode;
 
             if (
@@ -74,16 +87,17 @@ function renderToken(
               item.tokens[0].type === "text" &&
               item.tokens[0].tokens
             ) {
-              // Handle nested tokens within text token
               content = renderInlineTokens(item.tokens[0].tokens);
             } else {
-              // Handle simple tokens
               content = renderInlineTokens(item.tokens);
             }
 
             return (
               <Box key={i}>
-                <Text>{token.ordered ? `${i + 1}.` : "•"} </Text>
+                <Text color={theme.text}>
+                  {token.ordered ? `${i + 1}.` : "•"}
+                </Text>
+                <Text> </Text>
                 <Text>{content}</Text>
               </Box>
             );
@@ -97,10 +111,10 @@ function renderToken(
           key={key}
           marginBottom={marginBottom}
           borderStyle="round"
-          borderColor={getCurrentTheme().secondary}
+          borderColor={theme.textDim}
           paddingX={1}
         >
-          <Text color={getCurrentTheme().secondary}>{token.text}</Text>
+          <Text color={theme.textDim} italic>{token.text}</Text>
         </Box>
       );
 
@@ -110,7 +124,7 @@ function renderToken(
     case "hr":
       return (
         <Box key={key} marginBottom={marginBottom} width="100%">
-          <Text>
+          <Text color={theme.border}>
             {Array.from(
               { length: process.stdout.columns - 12 },
               () => "─",
@@ -120,7 +134,6 @@ function renderToken(
       );
 
     default:
-      // Fallback for unsupported token types
       if ("raw" in token) {
         return <Text key={key}>{token.raw}</Text>;
       }
@@ -129,18 +142,18 @@ function renderToken(
 }
 
 function renderInlineTokens(tokens: Token[]): React.ReactNode {
+  const theme = getCurrentTheme();
+
   return tokens.map((token: Token, idx: number) => {
     switch (token.type) {
       case "text":
         // Check for interruption marker and highlight it
-        // Note: This handles the "[Interrupted by User]" marker that is added
-        // to the message content in toOpenAIMessages() for API context preservation
         if (token.text.includes("[Interrupted by User]")) {
           const parts = token.text.split("[Interrupted by User]");
           return (
             <React.Fragment key={idx}>
               {parts[0]}
-              <Text color={getCurrentTheme().error} bold>
+              <Text color={theme.error} bold>
                 [Interrupted by User]
               </Text>
               {parts[1]}
@@ -165,15 +178,20 @@ function renderInlineTokens(tokens: Token[]): React.ReactNode {
 
       case "codespan":
         return (
-          <Text key={idx} color={getCurrentTheme().accent}>
-            {token.text}
-          </Text>
+          <Text key={idx} color={theme.primary}>{token.text}</Text>
         );
 
       case "link":
         return (
-          <Text key={idx} underline color={getCurrentTheme().accent}>
+          <Text key={idx} underline color={theme.primary}>
             {token.text}
+          </Text>
+        );
+
+      case "del":
+        return (
+          <Text key={idx} strikethrough>
+            {renderInlineTokens(token.tokens || [])}
           </Text>
         );
 

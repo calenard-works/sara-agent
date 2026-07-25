@@ -390,12 +390,12 @@ export function CommandMessage({ commandMessage }: CommandMessageProps) {
         displayContent = <Text>running...</Text>;
         break;
       case "success": {
-        iconColor = "#a855f7";
+        iconColor = getCurrentTheme().shellMode;
         const shellResult = result as ShellResult | undefined;
         if (shellResult?.output) {
           displayContent = (
             <Box flexDirection="column">
-              <Text color="#a855f7" dimColor>
+              <Text color={getCurrentTheme().shellMode} dimColor>
                 $ {shellResult.command}
               </Text>
               <Text>{shellResult.output}</Text>
@@ -424,7 +424,7 @@ export function CommandMessage({ commandMessage }: CommandMessageProps) {
           </Text>
         </Box>
         <Box flexDirection="column">
-          <Text bold color="#a855f7">Shell</Text>
+          <Text bold color={getCurrentTheme().shellMode}>Shell</Text>
           <Box flexDirection="row">
             <Box>
               <Text>⎿{"  "}</Text>

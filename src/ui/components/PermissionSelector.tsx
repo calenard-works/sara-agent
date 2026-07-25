@@ -3,6 +3,7 @@ import path from "path";
 import { useState } from "react";
 import { Box, Text, useInput } from "ink";
 
+import { getCurrentTheme } from "../theme";
 import type {
   PermissionOption,
   PermissionUiHint,
@@ -167,7 +168,7 @@ function renderUiHintDetails(uiHint: PermissionUiHint, cwd: string) {
       <Box flexDirection="column">
         <Text>Bash command</Text>
         <Box marginTop={1} marginLeft={2}>
-          <Text color="cyan">{uiHint.command}</Text>
+          <Text color={getCurrentTheme().primary}>{uiHint.command}</Text>
         </Box>
         {uiHint.message && (
           <Box marginTop={1} marginLeft={2}>

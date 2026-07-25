@@ -637,7 +637,8 @@ export function PromptInput({
     ],
   );
 
-  const SHELL_MODE_COLOR = "#a855f7";
+  const theme = getCurrentTheme();
+  const SHELL_MODE_COLOR = theme.shellMode;
 
   return (
     <Box width="100%" flexDirection="column">
@@ -645,7 +646,7 @@ export function PromptInput({
       <Box
         flexDirection="column"
         borderStyle="round"
-        borderColor={shellMode ? SHELL_MODE_COLOR : getCurrentTheme().secondary}
+        borderColor={shellMode ? SHELL_MODE_COLOR : theme.border}
         paddingX={1}
         paddingY={0}
       >

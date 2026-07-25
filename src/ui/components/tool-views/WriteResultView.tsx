@@ -1,5 +1,7 @@
 import { Box, Text } from "ink";
 
+import { getCurrentTheme } from "../../theme";
+
 export interface WriteResultViewProps {
   result: {
     path: string;
@@ -22,7 +24,7 @@ export function WriteResultView({ result }: WriteResultViewProps) {
   return (
     <Box flexDirection="column">
       <Text>
-        <Text bold color="green">
+        <Text bold color={getCurrentTheme().success}>
           {modeText}
         </Text>
         {" "}

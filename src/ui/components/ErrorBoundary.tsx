@@ -1,6 +1,8 @@
 import { Component, type ReactNode } from "react";
 import { Box, Text } from "ink";
 
+import { getCurrentTheme } from "../theme";
+
 interface ErrorBoundaryProps {
   children: ReactNode;
 }
@@ -35,16 +37,17 @@ export class ErrorBoundary extends Component<
 
   override render(): ReactNode {
     if (this.state.hasError) {
+      const theme = getCurrentTheme();
       return (
         <Box flexDirection="column" paddingX={1} marginTop={1}>
           <Box
             borderStyle="round"
-            borderColor="red"
+            borderColor={theme.error}
             paddingX={1}
             paddingY={1}
             flexDirection="column"
           >
-            <Text bold color="red">
+            <Text bold color={theme.error}>
               ⚠️ Something went wrong
             </Text>
             <Text dimColor>{this.state.error?.message || "Unknown error"}</Text>
