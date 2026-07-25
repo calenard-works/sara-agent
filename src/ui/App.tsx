@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useRef } from "react";
 import { useEffectEvent } from "use-effect-event";
 import { useApp, useInput } from "ink";
 
@@ -57,7 +57,13 @@ export function App({ cwd, approvalMode }: AppProps) {
   }, [cwd, updateMCPServer, setError]);
 
   // First-run detection: check if any API keys are configured
+  const firstRunDone = useRef(false);
+  const addCommandCall = useEffectEvent(actions.addCommandCall);
+  const setInteractiveMode = useEffectEvent(actions.setInteractiveMode);
   useEffect(() => {
+    if (firstRunDone.current) return;
+    firstRunDone.current = true;
+
     // Check all known providers for API keys
     const providers = ["deepseek", "openai", "glm", "opencode"];
     const hasAnyKey = providers.some((p) => ConfigManager.getApiKey(p));
@@ -65,7 +71,7 @@ export function App({ cwd, approvalMode }: AppProps) {
     if (!hasAnyKey) {
       // Add welcome message
       const startedAt = new Date().toISOString();
-      actions.addCommandCall({
+      addCommandCall({
         kind: "cmd" as const,
         commandName: "/welcome" as any,
         callId: `/welcome_${Date.now()}`,
@@ -78,7 +84,7 @@ export function App({ cwd, approvalMode }: AppProps) {
       // Start login interactive mode
       getAllProviders()
         .then((allProviders) => {
-          actions.setInteractiveMode({
+          setInteractiveMode({
             type: "login-provider",
             providers: allProviders.map((p) => ({
               id: p.id,
@@ -88,7 +94,7 @@ export function App({ cwd, approvalMode }: AppProps) {
         })
         .catch(() => {
           // Fallback: try to set interactive mode anyway
-          actions.setInteractiveMode({
+          setInteractiveMode({
             type: "login-provider",
             providers: [
               { id: "deepseek", name: "DeepSeek" },
@@ -98,7 +104,7 @@ export function App({ cwd, approvalMode }: AppProps) {
           });
         });
     }
-  }, [actions]);
+  }, [addCommandCall, setInteractiveMode]);
 
   // ========================================================================
   // AGENT EXECUTION STATE DETECTION
