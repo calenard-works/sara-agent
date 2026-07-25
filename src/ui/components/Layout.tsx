@@ -203,7 +203,7 @@ export function Layout({
         )}
       </Box>
     );
-  }, [cwd, hasProvider, modelDisplayName]);
+  }, [cwd, hasProvider, modelDisplayName, state.isPlanMode]);
 
   // Interactive mode handlers
   const handleLoginProviderSelect = useCallback(

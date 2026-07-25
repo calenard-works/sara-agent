@@ -243,11 +243,23 @@ function buildThemeColors(palette: ColorPalette): ThemeColors {
  * Get current theme palette based on global configuration.
  * Returns a ThemeColors object so components can access both
  * `getCurrentTheme().primary` and legacy `getCurrentTheme().brand`.
+ *
+ * Results are cached — the config is only re-read when `invalidateThemeCache()`
+ * is called (e.g. after a config change via /config or /reload-tui).
  */
+let themeCache: ThemeColors | null = null;
+
 export function getCurrentTheme(): ThemeColors {
+  if (themeCache !== null) return themeCache;
   const config = ConfigManager.load();
   const resolved: ResolvedTheme = config.theme === "light" ? "light" : "dark";
   const palette = getBuiltInPalette(resolved);
   currentTheme.setPalette(palette);
-  return buildThemeColors(palette);
+  themeCache = buildThemeColors(palette);
+  return themeCache;
+}
+
+/** Invalidate the theme cache so the next `getCurrentTheme()` call re-reads config. */
+export function invalidateThemeCache(): void {
+  themeCache = null;
 }

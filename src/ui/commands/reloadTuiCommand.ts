@@ -7,6 +7,7 @@
 
 import type { CommandHandler } from "./command.types";
 import { ConfigManager } from "../../config";
+import { invalidateThemeCache } from "../theme";
 
 export const reloadTuiCommand: CommandHandler<void> = {
   name: "/reload-tui",
@@ -26,6 +27,8 @@ export const reloadTuiCommand: CommandHandler<void> = {
     try {
       // Reload config by re-reading from disk
       ConfigManager.load();
+      // Invalidate theme cache so next render picks up new theme
+      invalidateThemeCache();
 
       const completedCall = {
         ...commandCall,
