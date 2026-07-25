@@ -118,10 +118,45 @@ export function HelpBar({
           ))}
         </Box>
       ) : message ? (
-        /* Temporary message shown (e.g. escTips) */
-        <Box width="100%" flexDirection="row" justifyContent="center">
-          <Text dimColor>{message}</Text>
-        </Box>
+        /* Temporary message shown inline (e.g. escTips) — keep normal bar visible */
+        <>
+          <Box width="100%" flexDirection="row" justifyContent="space-between">
+            <Box flexDirection="row" alignItems="center" gap={1}>
+              {modeLabel !== "default" && (
+                <Text color={modeColor} bold>{modeLabel}</Text>
+              )}
+              {modelName && (
+                <><Text dimColor>·</Text><Text dimColor>{modelName}</Text></>
+              )}
+              {dirName && (
+                <><Text dimColor>·</Text><Text dimColor>{dirName}</Text></>
+              )}
+              {gitBranch && (
+                <><Text dimColor>·</Text><Text dimColor>{gitBranch}</Text></>
+              )}
+            </Box>
+            <Text dimColor>{message}</Text>
+          </Box>
+          <Box width="100%" flexDirection="row" justifyContent="space-between">
+            <Box flexDirection="row" alignItems="center" gap={1}>
+              {mcp.length > 0 && (() => {
+                const connected = mcp.filter((s) => s.status === "connected").length;
+                const connecting = mcp.filter((s) => s.status === "connecting").length;
+                const errorState = mcp.filter((s) => s.status === "error").length;
+                return (
+                  <>
+                    {connected > 0 && <Text dimColor color={getCurrentTheme().success}>· MCP {connected}</Text>}
+                    {connecting > 0 && <Text dimColor color={getCurrentTheme().warning}>· MCP {connecting}</Text>}
+                    {errorState > 0 && <Text dimColor color={getCurrentTheme().error}>· MCP {errorState}</Text>}
+                  </>
+                );
+              })()}
+            </Box>
+            <Box flexDirection="row" alignItems="center" gap={1}>
+              <Text dimColor>context: <Text color={tokenColor}>{contextPercent}% ({tokenDisplay})</Text></Text>
+            </Box>
+          </Box>
+        </>
       ) : (
         <>
           {/* === First line: left items (mode model dir branch) + right hint === */}
