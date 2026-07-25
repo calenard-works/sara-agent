@@ -26,6 +26,8 @@ export * from "./exitPlanMode";
 export * from "./taskList";
 export * from "./taskOutput";
 export * from "./taskStop";
+export * from "./agent";
+export * from "./agentSwarm";
 
 import { FileReadTool } from "./fileRead";
 import { ListFilesTool } from "./listFiles";
@@ -52,6 +54,8 @@ import { ExitPlanModeTool } from "./exitPlanMode";
 import { TaskListTool } from "./taskList";
 import { TaskOutputTool } from "./taskOutput";
 import { TaskStopTool } from "./taskStop";
+import { AgentTool } from "./agent";
+import { AgentSwarmTool } from "./agentSwarm";
 import type { Tool } from "./types";
 
 /**
@@ -88,6 +92,8 @@ export const ALL_TOOLS = [
   TaskListTool,
   TaskOutputTool,
   TaskStopTool,
+  AgentTool,
+  AgentSwarmTool,
 ] as const;
 
 /**
@@ -122,6 +128,8 @@ const TOOLS_BY_NAME = {
   TaskList: TaskListTool,
   TaskOutput: TaskOutputTool,
   TaskStop: TaskStopTool,
+  Agent: AgentTool,
+  AgentSwarm: AgentSwarmTool,
 } as const;
 
 /**
