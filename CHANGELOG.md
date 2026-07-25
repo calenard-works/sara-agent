@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.1 (2026-07-25)
+
+### Fixed
+- Update notification no longer appears when local version is ahead of npm (now uses semver comparison)
+- Version display now correctly reads from `src/version.ts` instead of falling back to `0.5.0`
+
 ## 0.6.0 (2026-07-25)
 
 ### Added
