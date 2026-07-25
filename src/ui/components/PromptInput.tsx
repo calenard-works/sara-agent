@@ -84,27 +84,6 @@ export function PromptInput({
 
   const [escTips, setEscTips] = useState<string | undefined>(undefined);
 
-  // Update notification state
-  const [updateAvailable, setUpdateAvailable] = useState<string | undefined>(undefined);
-
-  // Check for newer version on mount
-  useEffect(() => {
-    const controller = new AbortController();
-    fetch("https://registry.npmjs.org/sara-agent/latest", {
-      signal: controller.signal,
-    })
-      .then((res) => res.json())
-      .then((data: { version?: string }) => {
-        if (data.version && data.version !== VERSION) {
-          setUpdateAvailable(data.version);
-        }
-      })
-      .catch(() => {
-        // Silently ignore fetch errors (offline, etc.)
-      });
-    return () => controller.abort();
-  }, []);
-
   // Help mode state - triggered by ? at the beginning of input
   const [helpMode, setHelpMode] = useState<boolean>(false);
 
@@ -634,8 +613,6 @@ export function PromptInput({
           message={escTips}
           tokenUsage={state.tokenUsage}
           version={VERSION}
-          updateAvailable={updateAvailable}
-          isExecuting={isAgentExecuting}
         />
       )}
     </Box>

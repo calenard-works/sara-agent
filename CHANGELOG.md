@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.0 (2026-07-25)
+
+### Added
+- `sara update` CLI command — runs `npm i -g --ignore-scripts sara-agent` with streaming output
+- Update notification box at the top of the TUI when a newer version is available on npm
+- Bordered notification panel with "Update Available!" message and instructions
+
+### Changed
+- Update notification moved from yellow inline text in the help bar to a prominent bordered box at the top of the interface
+- Help bar no longer shows "esc to cancel"; always displays "? for shortcuts"
+
 ## 0.2.3 (2026-07-25)
 
 ### Added

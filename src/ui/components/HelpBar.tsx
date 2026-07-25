@@ -64,8 +64,6 @@ export interface HelpBarProps {
     total_tokens: number;
   };
   version?: string; // current app version
-  updateAvailable?: string; // newer version available on npm
-  isExecuting?: boolean; // show cancel hint instead of ? for shortcuts
 }
 
 const getStatusMessage = (approvalMode?: ApprovalMode) => {
@@ -84,8 +82,6 @@ export function HelpBar({
   mcp = [],
   tokenUsage,
   version,
-  updateAvailable,
-  isExecuting = false,
 }: HelpBarProps) {
   const statusMessage = getStatusMessage(approvalMode);
 
@@ -160,14 +156,7 @@ export function HelpBar({
                 </Text>
               )}
               {version && <Text dimColor>v{version} </Text>}
-              {updateAvailable && (
-                <Text color={getCurrentTheme().warning}>⬆ v{updateAvailable} </Text>
-              )}
-              {isExecuting ? (
-                <Text dimColor>esc to cancel</Text>
-              ) : (
-                <Text dimColor>? for shortcuts</Text>
-              )}
+              <Text dimColor>? for shortcuts</Text>
             </Box>
             <Box flexGrow={1} justifyContent="flex-end" marginLeft={2}>
               <Box flexDirection="row" alignItems="center" gap={2}>

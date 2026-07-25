@@ -8,6 +8,7 @@ import type { LLMMessage } from "../../sessions/types";
 import { isTransientToolState } from "../../tools/runner.types";
 import { Logo } from "./Logo";
 import { ConfigManager } from "../../config";
+import { VERSION } from "../../version";
 import MessageFeed from "./MessageFeed";
 import { PromptInput } from "./PromptInput";
 import ErrorView from "./ErrorView";
@@ -106,6 +107,25 @@ export function Layout({
 
   const shouldShowStatus =
     !hasPermissionRequest && (state.isLLMGenerating || statusLabel !== undefined);
+
+  // Update notification state
+  const [updateAvailable, setUpdateAvailable] = useState<string | undefined>(
+    undefined,
+  );
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch("https://registry.npmjs.org/sara-agent/latest", {
+      signal: controller.signal,
+    })
+      .then((res) => res.json())
+      .then((data: { version?: string }) => {
+        if (data.version && data.version !== VERSION) {
+          setUpdateAvailable(data.version);
+        }
+      })
+      .catch(() => {});
+    return () => controller.abort();
+  }, []);
 
   const logo = useMemo(() => {
     let modelName = "unknown";
@@ -263,6 +283,29 @@ export function Layout({
   return (
     <ErrorBoundary>
       <Box flexDirection="column">
+        {updateAvailable && (
+          <Box
+            flexDirection="column"
+            borderStyle="round"
+            borderColor={getCurrentTheme().warning}
+            paddingX={2}
+            paddingY={1}
+            marginBottom={1}
+          >
+            <Box flexDirection="row" justifyContent="center">
+              <Text bold color={getCurrentTheme().warning}>
+                Update Available! Sara v{updateAvailable}
+              </Text>
+            </Box>
+            <Box flexDirection="row" justifyContent="center" marginTop={1}>
+              <Text dimColor>
+                Press Ctrl+C twice and run sara update or run /update command
+                below.
+              </Text>
+            </Box>
+          </Box>
+        )}
+
         <MessageFeed
           messages={state.messages}
           toolCalls={state.toolCalls}
