@@ -1,6 +1,5 @@
 import { CommandHandler, type StatusResult } from "./command.types";
-
-const VERSION = "0.2.3";
+import { VERSION } from "../../version";
 
 export const statusCommand: CommandHandler<StatusResult | undefined> = {
   name: "/status",

@@ -12,6 +12,7 @@ import {
   HelpResult,
   MCPResult,
   StatusResult,
+  UpdateResult,
 } from "../commands/command.types";
 
 export interface CommandMessageProps {
@@ -299,6 +300,70 @@ export function CommandMessage({ commandMessage }: CommandMessageProps) {
         </Box>
         <Box flexDirection="column">
           <Text bold>Configuration</Text>
+          <Box flexDirection="row">
+            <Box>
+              <Text>⎿{"  "}</Text>
+            </Box>
+            <Box flexDirection="column">{displayContent}</Box>
+          </Box>
+        </Box>
+      </Box>
+    );
+  }
+
+  // Special handling for /update command: show update result
+  if (commandName === "/update") {
+    let iconColor: string | undefined = undefined;
+    let displayContent: React.ReactNode = "";
+
+    switch (status) {
+      case "executing":
+        iconColor = getCurrentTheme().secondary;
+        displayContent = <Text>updating sara-agent...</Text>;
+        break;
+      case "success": {
+        iconColor = getCurrentTheme().success;
+        const updateResult = result as UpdateResult | undefined;
+        if (updateResult) {
+          const rows: React.ReactNode[] = [
+            <Box key="updated" flexDirection="row" gap={1}>
+              <Text bold color={getCurrentTheme().success}>✓ Updated to</Text>
+              <Text bold>v{updateResult.version}</Text>
+            </Box>,
+          ];
+          if (updateResult.releaseNotes) {
+            rows.push(
+              <Box key="notes" marginTop={1} flexDirection="column">
+                <Text bold>Release notes:</Text>
+                <InkMarkdown>{updateResult.releaseNotes}</InkMarkdown>
+              </Box>,
+            );
+          }
+          displayContent = <Box flexDirection="column">{rows}</Box>;
+        } else {
+          displayContent = (
+            <Text color={getCurrentTheme().secondary}>(no result)</Text>
+          );
+        }
+        break;
+      }
+      case "error":
+        iconColor = getCurrentTheme().error;
+        displayContent = (
+          <Text color={getCurrentTheme().error}>{error || "Update failed"}</Text>
+        );
+        break;
+    }
+
+    return (
+      <Box marginTop={1} width={terminalWidth - 4}>
+        <Box marginRight={1}>
+          <Text color={iconColor}>
+            {status === "executing" ? loadingIcons[loadingIconIndex] : "•"}
+          </Text>
+        </Box>
+        <Box flexDirection="column">
+          <Text bold>Update</Text>
           <Box flexDirection="row">
             <Box>
               <Text>⎿{"  "}</Text>

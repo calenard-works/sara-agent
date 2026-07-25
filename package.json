@@ -4,6 +4,7 @@
   "description": "sara-agent - AI Coding Agent",
   "type": "module",
   "files": [
+    "CHANGELOG.md",
     "dist",
     "README.md",
     "LICENSE"

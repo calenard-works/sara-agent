@@ -63,6 +63,8 @@ export interface HelpBarProps {
   tokenUsage?: {
     total_tokens: number;
   };
+  version?: string; // current app version
+  updateAvailable?: string; // newer version available on npm
 }
 
 const getStatusMessage = (approvalMode?: ApprovalMode) => {
@@ -80,6 +82,8 @@ export function HelpBar({
   helpMode = false,
   mcp = [],
   tokenUsage,
+  version,
+  updateAvailable,
 }: HelpBarProps) {
   const statusMessage = getStatusMessage(approvalMode);
 
@@ -152,6 +156,10 @@ export function HelpBar({
                 >
                   {statusMessage}
                 </Text>
+              )}
+              {version && <Text dimColor>v{version} </Text>}
+              {updateAvailable && (
+                <Text color={getCurrentTheme().warning}>⬆ v{updateAvailable} </Text>
               )}
               <Text dimColor>? for shortcuts</Text>
             </Box>

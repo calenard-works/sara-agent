@@ -20,7 +20,8 @@ export type CommandName =
   | "/mcp"
   | "/login"
   | "/model"
-  | "/status";
+  | "/status"
+  | "/update";
 
 /**
  * Command result types for each command
@@ -52,6 +53,12 @@ export type StatusResult = {
   commandMessages: number;
 };
 
+export type UpdateResult = {
+  updated: boolean;
+  version: string;
+  releaseNotes?: string;
+};
+
 export type MCPResult = MCPServerState[];
 
 /**
@@ -73,7 +80,9 @@ export type CommandConcreteResult<T extends CommandName> = T extends "/clear"
               ? unknown
               : T extends "/status"
                 ? StatusResult
-                : never;
+                : T extends "/update"
+                  ? UpdateResult
+                  : never;
 
 /**
  * Command call interface - represents a command execution

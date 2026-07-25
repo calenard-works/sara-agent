@@ -7,6 +7,7 @@ import { loginCommand } from "./loginCommand";
 import { mcpCommand } from "./mcpCommand";
 import { modelCommand } from "./modelCommand";
 import { statusCommand } from "./statusCommand";
+import { updateCommand } from "./updateCommand";
 
 /**
  * All available command handlers with their names
@@ -21,6 +22,7 @@ export const ALL_COMMANDS = [
   mcpCommand,
   modelCommand,
   statusCommand,
+  updateCommand,
 ] as const;
 
 /**
@@ -36,6 +38,7 @@ export const COMMANDS_BY_NAME = {
   "/mcp": mcpCommand,
   "/model": modelCommand,
   "/status": statusCommand,
+  "/update": updateCommand,
 };
 
 // Re-export types and executor
