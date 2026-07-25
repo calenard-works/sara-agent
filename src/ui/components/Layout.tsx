@@ -302,10 +302,10 @@ export function Layout({
     if (!mode) return null;
 
     switch (mode.type) {
-      case "login-provider":
+      case "provider-provider":
         return (
           <ProviderSelector
-            title="Select provider to login:"
+            title="Providers"
             providers={mode.providers}
             onSelect={handleLoginProviderSelect}
             onCancel={handleInteractiveCancel}

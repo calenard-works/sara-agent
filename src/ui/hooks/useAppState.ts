@@ -50,7 +50,7 @@ function updateMCPServers(
  */
 export type InteractiveMode =
   | null
-  | { type: "login-provider"; providers: { id: string; name: string; baseURL?: string }[] }
+  | { type: "provider-provider"; providers: { id: string; name: string; baseURL?: string; configured?: boolean }[] }
   | { type: "login-key"; provider: { id: string; name: string; baseURL?: string } }
   | { type: "model-provider"; providers: { id: string; name: string }[] }
   | {

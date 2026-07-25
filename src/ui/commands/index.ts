@@ -11,7 +11,7 @@ import { exportCommand } from "./exportCommand";
 import { goalCommand } from "./goalCommand";
 import { helpCommand } from "./helpCommand";
 import { initCommand } from "./initCommand";
-import { loginCommand } from "./loginCommand";
+import { providerCommand } from "./providerCommand";
 import { mcpCommand } from "./mcpCommand";
 import { modelCommand } from "./modelCommand";
 import { reloadTuiCommand } from "./reloadTuiCommand";
@@ -38,7 +38,7 @@ export const ALL_COMMANDS = [
   goalCommand,
   helpCommand,
   initCommand,
-  loginCommand,
+  providerCommand,
   mcpCommand,
   modelCommand,
   permissionCommand,
@@ -73,7 +73,7 @@ export const COMMANDS_BY_NAME: Partial<Record<CommandName, AnyCommandHandler>> =
   "/goal": goalCommand,
   "/help": helpCommand,
   "/init": initCommand,
-  "/login": loginCommand,
+  "/provider": providerCommand,
   "/mcp": mcpCommand,
   "/model": modelCommand,
   "/permission": permissionCommand,

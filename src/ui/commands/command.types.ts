@@ -23,10 +23,10 @@ export type CommandName =
   | "/help"
   | "/init"
   | "/mcp"
-  | "/login"
   | "/model"
   | "/permission"
   | "/plan"
+  | "/provider"
   | "/reload-tui"
   | "/sessions"
   | "/shell"
@@ -159,7 +159,7 @@ export type CommandConcreteResult<T extends CommandName> = T extends "/autoedit"
                 ? InitResult
                 : T extends "/mcp"
                   ? MCPResult
-                  : T extends "/login"
+                  : T extends "/provider"
                     ? unknown
                     : T extends "/model"
                       ? unknown

@@ -49,6 +49,22 @@ function getDefaultTitle(session: Session): string {
   return "Untitled session";
 }
 
+/**
+ * Get the last user message from a session for display.
+ */
+function getLastPrompt(session: Session): string | null {
+  for (let i = session.messages.length - 1; i >= 0; i--) {
+    const m = session.messages[i];
+    if (m.kind === "api" && m.message.role === "user") {
+      if (typeof m.message.content === "string" && m.message.content.trim()) {
+        const content = m.message.content.trim();
+        return content.length > 60 ? content.slice(0, 57) + "..." : content;
+      }
+    }
+  }
+  return null;
+}
+
 export function SessionList({
   sessions,
   onSelect,
@@ -62,6 +78,8 @@ export function SessionList({
   );
   const [refreshCounter, setRefreshCounter] = useState(0);
 
+  const theme = getCurrentTheme();
+
   // Refresh sessions list
   const refreshSessions = useCallback(() => {
     setRefreshCounter((c) => c + 1);
@@ -69,7 +87,6 @@ export function SessionList({
 
   // Get current sessions (may need refresh)
   const currentSessions = useMemo(() => {
-    // Trigger re-fetch on refresh
     void refreshCounter;
     return sessions;
   }, [sessions, refreshCounter]);
@@ -190,64 +207,96 @@ export function SessionList({
     }
   });
 
+  const terminalWidth = process.stdout.columns || 80;
+  const border = "─".repeat(terminalWidth - 4);
+
   return (
     <Box flexDirection="column" marginTop={1}>
-      <Text color={getCurrentTheme().brand} bold>
-        Sessions
-      </Text>
+      {/* Header border */}
+      <Box>
+        <Text color={theme.primary}>{border}</Text>
+      </Box>
 
-      <Box flexDirection="column" marginTop={1}>
+      {/* Title */}
+      <Box>
+        <Text bold color={theme.primary}>
+          {" Sessions"}
+        </Text>
+      </Box>
+
+      {/* Hint */}
+      <Box>
+        <Text color={theme.textDim}>
+          {" ↑↓ navigate · Enter switch · R rename · D delete (double tap) · Esc cancel"}
+        </Text>
+      </Box>
+
+      <Box marginTop={1} />
+
+      {/* Session list */}
+      <Box flexDirection="column">
         {currentSessions.length === 0 ? (
-          <Text color={getCurrentTheme().secondary} dimColor>
-            No saved sessions
-          </Text>
+          <Text color={theme.textDim}>No saved sessions</Text>
         ) : (
           currentSessions.map((session, index) => {
             const isSelected = index === clampedIndex;
-            const prefix = isSelected ? " → " : "   ";
-            const color = isSelected ? getCurrentTheme().accent : undefined;
+            const pointer = isSelected ? "→ " : "  ";
+            const pointerColor = isSelected ? theme.primary : theme.textDim;
+            const titleColor = isSelected ? theme.primary : theme.text;
+            const titleStyle = isSelected ? "bold" : undefined;
             const title = session.title || getDefaultTitle(session);
             const timeStr = formatRelativeTime(session.lastActivity ?? 0);
             const msgCount = session.messages.length;
+            const lastPrompt = getLastPrompt(session);
 
             return (
               <Box key={session.sessionId} flexDirection="column">
                 {renameIndex === index ? (
                   <Box flexDirection="row" alignItems="center">
-                    <Text color={color}>{prefix}Rename: </Text>
-                    <Text color={color}>
+                    <Text color={pointerColor}>{pointer}Rename: </Text>
+                    <Text color={pointerColor}>
                       {chalk.inverse(renameValue || " ")}
                     </Text>
                   </Box>
                 ) : (
                   <Box flexDirection="row" alignItems="center">
-                    <Text color={color}>
-                      {prefix}
-                      {isSelected ? "● " : ""}
-                      {title}
+                    <Text color={pointerColor}>
+                      {pointer}
+                      <Text bold={titleStyle} color={titleColor}>
+                        {title}
+                      </Text>
                     </Text>
+                    <Text color={theme.textDim}>  {timeStr}</Text>
                   </Box>
                 )}
+
                 <Box flexDirection="row" gap={2}>
-                  <Text dimColor>
-                    {timeStr} ● {msgCount} messages
+                  <Text color={theme.textMuted} dimColor>
+                    {session.sessionId} · {msgCount} messages
                   </Text>
                   {deleteConfirmIndex === index && (
-                    <Text color={getCurrentTheme().error}>
+                    <Text color={theme.error}>
                       (press D again to confirm delete)
                     </Text>
                   )}
                 </Box>
+
+                {lastPrompt && renameIndex !== index && (
+                  <Text color={theme.textDim} dimColor>
+                    {"  › " + lastPrompt}
+                  </Text>
+                )}
               </Box>
             );
           })
         )}
       </Box>
 
-      <Box marginTop={1}>
-        <Text dimColor>
-          ↑↓ navigate  Enter switch  R rename  D delete (double tap)  Esc cancel
-        </Text>
+      <Box marginTop={1} />
+
+      {/* Footer border */}
+      <Box>
+        <Text color={theme.primary}>{border}</Text>
       </Box>
     </Box>
   );

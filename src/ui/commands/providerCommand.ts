@@ -1,18 +1,18 @@
 import { CommandHandler } from "./command.types";
 import { ConfigManager } from "../../config";
-import { getAllProviders } from "../../models/registry";
+import { getAllProviders, getConfiguredProviders } from "../../models/registry";
 
-export type LoginResult = void;
+export type ProviderResult = void;
 
-export const loginCommand: CommandHandler<LoginResult> = {
-  name: "/login",
-  description: "Set API key for a provider",
+export const providerCommand: CommandHandler<ProviderResult> = {
+  name: "/provider",
+  description: "Manage AI providers (add / delete / select)",
   execute: async (messages, llmClient, actions, _onExecutePrompt, args) => {
     const startedAt = new Date().toISOString();
-    const callId = `/login_${Date.now()}`;
+    const callId = `/provider_${Date.now()}`;
     const commandCall = {
       kind: "cmd" as const,
-      commandName: "/login" as const,
+      commandName: "/provider" as const,
       callId,
       status: "executing" as const,
       startedAt,
@@ -20,16 +20,18 @@ export const loginCommand: CommandHandler<LoginResult> = {
     actions.addCommandCall(commandCall);
 
     try {
-      const providers = await getAllProviders();
+      const allProviders = await getAllProviders();
+      const configured = await getConfiguredProviders();
+      const configuredIds = new Set(configured.map((p) => p.id));
 
-      // Direct mode: /login <provider> <api-key>
+      // Direct mode: /provider <provider> <api-key>
       if (args && args.trim().length > 0) {
         const parts = args.trim().split(/\s+/);
         const providerId = parts[0];
         const apiKey = parts.slice(1).join(" ");
 
         if (apiKey) {
-          const provider = providers.find((p) => p.id === providerId);
+          const provider = allProviders.find((p) => p.id === providerId);
           if (!provider) {
             throw new Error(`Unknown provider: "${providerId}"`);
           }
@@ -50,10 +52,17 @@ export const loginCommand: CommandHandler<LoginResult> = {
         }
       }
 
-      // Interactive mode
+      // Interactive mode - show all providers with configured ones marked
+      const providersWithStatus = allProviders.map((p) => ({
+        id: p.id,
+        name: p.name,
+        baseURL: p.baseURL,
+        configured: configuredIds.has(p.id),
+      }));
+
       actions.setInteractiveMode({
-        type: "login-provider",
-        providers: providers.map((p) => ({ id: p.id, name: p.name })),
+        type: "provider-provider",
+        providers: providersWithStatus,
       });
 
       const completedCall = {

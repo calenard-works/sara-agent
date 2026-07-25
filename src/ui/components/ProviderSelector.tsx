@@ -1,6 +1,5 @@
 import { useState, useMemo } from "react";
 import { Box, Text, useInput } from "ink";
-import chalk from "chalk";
 
 import { getCurrentTheme } from "../theme";
 
@@ -10,6 +9,7 @@ interface Provider {
   id: string;
   name: string;
   baseURL?: string;
+  configured?: boolean;
 }
 
 interface ProviderSelectorProps {
@@ -114,80 +114,85 @@ export function ProviderSelector({
     }
   });
 
-  // Render filter input with cursor
-  const renderFilter = () => {
-    if (filter.length === 0 && cursorPos === 0) {
-      return chalk.inverse(" ") + chalk.grey("type to filter...");
-    }
-    let result = "";
-    for (let i = 0; i < filter.length; i++) {
-      if (i === cursorPos) {
-        result += chalk.inverse(filter[i]);
-      } else {
-        result += filter[i];
-      }
-    }
-    if (cursorPos >= filter.length) {
-      result += chalk.inverse(" ");
-    }
-    return result;
-  };
+  const theme = getCurrentTheme();
 
   return (
     <Box flexDirection="column" marginTop={1}>
-      <Text color={getCurrentTheme().brand} bold>
-        {title}
-      </Text>
-
-      {/* Filter input */}
-      <Box
-        marginTop={1}
-        borderStyle="round"
-        borderColor={getCurrentTheme().secondary}
-        paddingX={1}
-      >
-        <Text>{renderFilter()}</Text>
+      {/* Header border */}
+      <Box>
+        <Text color={theme.primary}>
+          {"─".repeat(Math.max(20, process.stdout.columns - 4))}
+        </Text>
       </Box>
 
+      {/* Title */}
+      <Box>
+        <Text bold color={theme.primary}>
+          {" " + title}
+        </Text>
+      </Box>
+
+      {/* Hint */}
+      <Box>
+        <Text color={theme.textDim}>
+          {" ↑↓ navigate · Enter select · Esc cancel"}
+        </Text>
+      </Box>
+
+      <Box marginTop={1} />
+
       {/* Visible items */}
-      <Box flexDirection="column" marginTop={1}>
+      <Box flexDirection="column">
         {startIndex > 0 && (
-          <Text color={getCurrentTheme().secondary} dimColor>
+          <Text color={theme.textMuted}>
             ↑ {startIndex} more above
           </Text>
         )}
         {visibleItems.map((provider, vi) => {
           const realIndex = startIndex + vi;
           const isSelected = realIndex === clampedIndex;
-          const prefix = isSelected ? " → " : "   ";
-          const color = isSelected ? getCurrentTheme().accent : undefined;
+          const pointer = isSelected ? "→ " : "  ";
+          const pointerColor = isSelected ? theme.primary : theme.textDim;
+          const labelColor = isSelected ? theme.primary : theme.text;
+          const labelStyle = isSelected ? "bold" : undefined;
 
           return (
-            <Text key={provider.id} color={color}>
-              {prefix}
-              {provider.name}
-              {provider.baseURL ? (
-                <Text dimColor> ({provider.baseURL})</Text>
-              ) : null}
-              {isSelected ? "  ←" : ""}
-            </Text>
+            <Box key={provider.id} flexDirection="column">
+              <Text color={pointerColor}>
+                {pointer}
+                <Text bold={labelStyle} color={labelColor}>
+                  {provider.name}
+                  {provider.configured ? (
+                    <Text color={theme.success}> ✓</Text>
+                  ) : null}
+                </Text>
+              </Text>
+              {provider.baseURL && (
+                <Text color={theme.textMuted} dimColor>
+                  {"      " + provider.baseURL}
+                </Text>
+              )}
+            </Box>
           );
         })}
         {endIndex < filtered.length && (
-          <Text color={getCurrentTheme().secondary} dimColor>
+          <Text color={theme.textMuted}>
             ↓ {filtered.length - endIndex} more below
           </Text>
         )}
         {filtered.length === 0 && (
-          <Text color={getCurrentTheme().secondary} dimColor>
+          <Text color={theme.textMuted}>
             No matches
           </Text>
         )}
       </Box>
 
-      <Box marginTop={1}>
-        <Text color={getCurrentTheme().secondary} dimColor>
-          ↑↓ navigate Enter select Esc cancel
+      <Box marginTop={1} />
+
+      {/* Footer border */}
+      <Box>
+        <Text color={theme.primary}>
+          {"─".repeat(Math.max(20, process.stdout.columns - 4))}
         </Text>
       </Box>
     </Box>
