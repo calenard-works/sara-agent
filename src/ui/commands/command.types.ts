@@ -12,18 +12,23 @@ export type CommandCallStatus = "executing" | "success" | "error";
  * All available command names
  */
 export type CommandName =
+  | "/btw"
   | "/clear"
   | "/compact"
   | "/config"
+  | "/export"
   | "/help"
   | "/init"
   | "/mcp"
   | "/login"
   | "/model"
+  | "/reload-tui"
   | "/sessions"
   | "/shell"
   | "/status"
   | "/update"
+  | "/usage"
+  | "/version"
   | "/welcome";
 
 /**
@@ -56,6 +61,25 @@ export type StatusResult = {
   commandMessages: number;
 };
 
+export type VersionResult = {
+  version: string;
+  description: string;
+};
+
+export type UsageResult = {
+  version: string;
+  model: string;
+  promptTokens: number;
+  completionTokens: number;
+  totalTokens: number;
+  contextLimit: number;
+};
+
+export type ExportResult = {
+  path: string;
+  messageCount: number;
+};
+
 export type UpdateResult = {
   updated: boolean;
   version: string;
@@ -69,29 +93,43 @@ export type MCPResult = MCPServerState[];
 /**
  * Generic type for command results based on command name
  */
-export type CommandConcreteResult<T extends CommandName> = T extends "/clear"
-  ? ClearResult
-  : T extends "/compact"
-    ? CompactResult
-    : T extends "/config"
-      ? ConfigResult
-      : T extends "/help"
-        ? HelpResult
-        : T extends "/init"
-          ? InitResult
-          : T extends "/mcp"
-            ? MCPResult
-            : T extends "/login"
-              ? unknown
-              : T extends "/shell"
-                ? ShellResult
-                : T extends "/status"
-                  ? StatusResult
-                  : T extends "/update"
-                    ? UpdateResult
-                    : T extends "/welcome"
-                      ? undefined
-                      : never;
+export type CommandConcreteResult<T extends CommandName> = T extends "/btw"
+  ? string
+  : T extends "/clear"
+    ? ClearResult
+    : T extends "/compact"
+      ? CompactResult
+      : T extends "/config"
+        ? ConfigResult
+        : T extends "/export"
+          ? ExportResult
+          : T extends "/help"
+            ? HelpResult
+            : T extends "/init"
+              ? InitResult
+              : T extends "/mcp"
+                ? MCPResult
+                : T extends "/login"
+                  ? unknown
+                  : T extends "/model"
+                    ? unknown
+                    : T extends "/reload-tui"
+                      ? void
+                      : T extends "/sessions"
+                        ? undefined
+                        : T extends "/shell"
+                          ? ShellResult
+                          : T extends "/status"
+                            ? StatusResult
+                            : T extends "/update"
+                              ? UpdateResult
+                              : T extends "/usage"
+                                ? UsageResult
+                                : T extends "/version"
+                                  ? VersionResult
+                                  : T extends "/welcome"
+                                    ? undefined
+                                    : never;
 
 /**
  * Command call interface - represents a command execution

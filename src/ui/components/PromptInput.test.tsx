@@ -39,6 +39,7 @@ const mockAppActions: AppActions = {
   updateMCPServer: vi.fn(),
   setInteractiveMode: vi.fn(),
   clearInteractiveMode: vi.fn(),
+  loadSession: vi.fn(),
 };
 
 const mockOnExit = vi.fn();

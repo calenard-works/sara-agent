@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.4.0 (2026-07-25)
+
+### Added
+- `/version` command — shows Sara version and description
+- `/usage` command — shows session token usage, model, and context window
+- `/export` command — exports current session as Markdown file
+- `/btw` command — runs a quick side question through the LLM
+- `/reload-tui` command — reloads configuration without restarting
+
 ## 0.3.3 (2026-07-25)
 
 ### Added

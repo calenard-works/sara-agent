@@ -9,11 +9,14 @@ import { MCPDetailView } from "./MCPDetailView";
 import {
   CompactResult,
   ConfigResult,
+  ExportResult,
   HelpResult,
   MCPResult,
   ShellResult,
   StatusResult,
   UpdateResult,
+  UsageResult,
+  VersionResult,
 } from "../commands/command.types";
 
 export interface CommandMessageProps {
@@ -486,6 +489,277 @@ export function CommandMessage({ commandMessage }: CommandMessageProps) {
         </Box>
         <Box flexDirection="column">
           <Text bold>Session Status</Text>
+          <Box flexDirection="row">
+            <Box>
+              <Text>⎿{"  "}</Text>
+            </Box>
+            <Box flexDirection="column">{displayContent}</Box>
+          </Box>
+        </Box>
+      </Box>
+    );
+  }
+
+  // Special handling for /version command
+  if (commandName === "/version") {
+    let iconColor: string | undefined = undefined;
+    let displayContent: React.ReactNode = "";
+
+    switch (status) {
+      case "executing":
+        iconColor = getCurrentTheme().secondary;
+        displayContent = <Text>checking version...</Text>;
+        break;
+      case "success": {
+        iconColor = getCurrentTheme().success;
+        const versionResult = result as VersionResult | undefined;
+        if (versionResult) {
+          displayContent = (
+            <Box flexDirection="column">
+              <Text bold>{versionResult.description}</Text>
+              <Text dimColor>v{versionResult.version}</Text>
+            </Box>
+          );
+        } else {
+          displayContent = (
+            <Text color={getCurrentTheme().secondary}>(no result)</Text>
+          );
+        }
+        break;
+      }
+      case "error":
+        iconColor = getCurrentTheme().error;
+        displayContent = (
+          <Text color={getCurrentTheme().error}>{error || "Failed"}</Text>
+        );
+        break;
+    }
+
+    return (
+      <Box marginTop={1} width={terminalWidth - 4}>
+        <Box marginRight={1}>
+          <Text color={iconColor}>
+            {status === "executing" ? loadingIcons[loadingIconIndex] : "•"}
+          </Text>
+        </Box>
+        <Box flexDirection="column">
+          <Text bold>Version</Text>
+          <Box flexDirection="row">
+            <Box>
+              <Text>⎿{"  "}</Text>
+            </Box>
+            <Box flexDirection="column">{displayContent}</Box>
+          </Box>
+        </Box>
+      </Box>
+    );
+  }
+
+  // Special handling for /usage command
+  if (commandName === "/usage") {
+    let iconColor: string | undefined = undefined;
+    let displayContent: React.ReactNode = "";
+
+    switch (status) {
+      case "executing":
+        iconColor = getCurrentTheme().secondary;
+        displayContent = <Text>gathering usage...</Text>;
+        break;
+      case "success": {
+        iconColor = getCurrentTheme().success;
+        const usageResult = result as UsageResult | undefined;
+        if (usageResult) {
+          const percent = Math.round(
+            (usageResult.totalTokens / usageResult.contextLimit) * 100,
+          );
+          const rows: React.ReactNode[] = [
+            <Box key="version" flexDirection="row" gap={1}>
+              <Text bold>Version:</Text>
+              <Text>{usageResult.version}</Text>
+            </Box>,
+            <Box key="model" flexDirection="row" gap={1}>
+              <Text bold>Model:</Text>
+              <Text>{usageResult.model}</Text>
+            </Box>,
+            <Box key="tokens" flexDirection="row" gap={1}>
+              <Text bold>Tokens:</Text>
+              <Text>
+                {usageResult.promptTokens} prompt +{" "}
+                {usageResult.completionTokens} completion ={" "}
+                {usageResult.totalTokens} total
+              </Text>
+            </Box>,
+            <Box key="context" flexDirection="row" gap={1}>
+              <Text bold>Context:</Text>
+              <Text>
+                {percent}% ({usageResult.totalTokens}/{usageResult.contextLimit})
+              </Text>
+            </Box>,
+          ];
+          displayContent = <Box flexDirection="column">{rows}</Box>;
+        } else {
+          displayContent = (
+            <Text color={getCurrentTheme().secondary}>(no data)</Text>
+          );
+        }
+        break;
+      }
+      case "error":
+        iconColor = getCurrentTheme().error;
+        displayContent = (
+          <Text color={getCurrentTheme().error}>{error || "Failed"}</Text>
+        );
+        break;
+    }
+
+    return (
+      <Box marginTop={1} width={terminalWidth - 4}>
+        <Box marginRight={1}>
+          <Text color={iconColor}>
+            {status === "executing" ? loadingIcons[loadingIconIndex] : "•"}
+          </Text>
+        </Box>
+        <Box flexDirection="column">
+          <Text bold>Usage</Text>
+          <Box flexDirection="row">
+            <Box>
+              <Text>⎿{"  "}</Text>
+            </Box>
+            <Box flexDirection="column">{displayContent}</Box>
+          </Box>
+        </Box>
+      </Box>
+    );
+  }
+
+  // Special handling for /export command
+  if (commandName === "/export") {
+    let iconColor: string | undefined = undefined;
+    let displayContent: React.ReactNode = "";
+
+    switch (status) {
+      case "executing":
+        iconColor = getCurrentTheme().secondary;
+        displayContent = <Text>exporting session...</Text>;
+        break;
+      case "success": {
+        iconColor = getCurrentTheme().success;
+        const exportResult = result as ExportResult | undefined;
+        if (exportResult) {
+          displayContent = (
+            <Box flexDirection="column">
+              <Text bold>✓ Exported {exportResult.messageCount} messages</Text>
+              <Text dimColor>{exportResult.path}</Text>
+            </Box>
+          );
+        } else {
+          displayContent = (
+            <Text color={getCurrentTheme().secondary}>(no result)</Text>
+          );
+        }
+        break;
+      }
+      case "error":
+        iconColor = getCurrentTheme().error;
+        displayContent = (
+          <Text color={getCurrentTheme().error}>{error || "Export failed"}</Text>
+        );
+        break;
+    }
+
+    return (
+      <Box marginTop={1} width={terminalWidth - 4}>
+        <Box marginRight={1}>
+          <Text color={iconColor}>
+            {status === "executing" ? loadingIcons[loadingIconIndex] : "•"}
+          </Text>
+        </Box>
+        <Box flexDirection="column">
+          <Text bold>Export</Text>
+          <Box flexDirection="row">
+            <Box>
+              <Text>⎿{"  "}</Text>
+            </Box>
+            <Box flexDirection="column">{displayContent}</Box>
+          </Box>
+        </Box>
+      </Box>
+    );
+  }
+
+  // Special handling for /btw command
+  if (commandName === "/btw") {
+    let iconColor: string | undefined = undefined;
+    let displayContent: React.ReactNode = "";
+
+    switch (status) {
+      case "executing":
+        iconColor = getCurrentTheme().secondary;
+        displayContent = <Text>running side question...</Text>;
+        break;
+      case "success":
+        iconColor = getCurrentTheme().success;
+        displayContent = <Text>Side question submitted.</Text>;
+        break;
+      case "error":
+        iconColor = getCurrentTheme().error;
+        displayContent = (
+          <Text color={getCurrentTheme().error}>{error || "Failed"}</Text>
+        );
+        break;
+    }
+
+    return (
+      <Box marginTop={1} width={terminalWidth - 4}>
+        <Box marginRight={1}>
+          <Text color={iconColor}>
+            {status === "executing" ? loadingIcons[loadingIconIndex] : "•"}
+          </Text>
+        </Box>
+        <Box flexDirection="column">
+          <Text bold>Btw</Text>
+          <Box flexDirection="row">
+            <Box>
+              <Text>⎿{"  "}</Text>
+            </Box>
+            <Box flexDirection="column">{displayContent}</Box>
+          </Box>
+        </Box>
+      </Box>
+    );
+  }
+
+  // Special handling for /reload-tui command
+  if (commandName === "/reload-tui") {
+    let iconColor: string | undefined = undefined;
+    let displayContent: React.ReactNode = "";
+
+    switch (status) {
+      case "executing":
+        iconColor = getCurrentTheme().secondary;
+        displayContent = <Text>reloading config...</Text>;
+        break;
+      case "success":
+        iconColor = getCurrentTheme().success;
+        displayContent = <Text>✓ Config reloaded</Text>;
+        break;
+      case "error":
+        iconColor = getCurrentTheme().error;
+        displayContent = (
+          <Text color={getCurrentTheme().error}>{error || "Failed"}</Text>
+        );
+        break;
+    }
+
+    return (
+      <Box marginTop={1} width={terminalWidth - 4}>
+        <Box marginRight={1}>
+          <Text color={iconColor}>
+            {status === "executing" ? loadingIcons[loadingIconIndex] : "•"}
+          </Text>
+        </Box>
+        <Box flexDirection="column">
+          <Text bold>Reload</Text>
           <Box flexDirection="row">
             <Box>
               <Text>⎿{"  "}</Text>
