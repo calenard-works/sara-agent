@@ -13,6 +13,19 @@ export * from "./openai";
 export * from "./fetch";
 export * from "./fetchUrl";
 export * from "./webSearch";
+export * from "./write";
+export * from "./readMediaFile";
+export * from "./selectTools";
+export * from "./askUserQuestion";
+export * from "./createGoal";
+export * from "./getGoal";
+export * from "./updateGoal";
+export * from "./setGoalBudget";
+export * from "./enterPlanMode";
+export * from "./exitPlanMode";
+export * from "./taskList";
+export * from "./taskOutput";
+export * from "./taskStop";
 
 import { FileReadTool } from "./fileRead";
 import { ListFilesTool } from "./listFiles";
@@ -26,6 +39,19 @@ import { TodoReadTool, TodoWriteTool } from "./todo";
 import { FetchTool } from "./fetch";
 import { FetchUrlTool } from "./fetchUrl";
 import { WebSearchTool } from "./webSearch";
+import { WriteTool } from "./write";
+import { ReadMediaFileTool } from "./readMediaFile";
+import { SelectToolsTool } from "./selectTools";
+import { AskUserQuestionTool } from "./askUserQuestion";
+import { CreateGoalTool } from "./createGoal";
+import { GetGoalTool } from "./getGoal";
+import { UpdateGoalTool } from "./updateGoal";
+import { SetGoalBudgetTool } from "./setGoalBudget";
+import { EnterPlanModeTool } from "./enterPlanMode";
+import { ExitPlanModeTool } from "./exitPlanMode";
+import { TaskListTool } from "./taskList";
+import { TaskOutputTool } from "./taskOutput";
+import { TaskStopTool } from "./taskStop";
 import type { Tool } from "./types";
 
 /**
@@ -43,12 +69,25 @@ export const ALL_TOOLS = [
   GlobTool,
   FileEditTool,
   BashTool,
+  WriteTool,
+  ReadMediaFileTool,
   ArchitectTool,
   SkillTool,
   TodoReadTool,
   TodoWriteTool,
   FetchUrlTool,
   WebSearchTool,
+  SelectToolsTool,
+  AskUserQuestionTool,
+  CreateGoalTool,
+  GetGoalTool,
+  UpdateGoalTool,
+  SetGoalBudgetTool,
+  EnterPlanModeTool,
+  ExitPlanModeTool,
+  TaskListTool,
+  TaskOutputTool,
+  TaskStopTool,
 ] as const;
 
 /**
@@ -70,6 +109,19 @@ const TOOLS_BY_NAME = {
   fetch: FetchTool,
   FetchURL: FetchUrlTool,
   WebSearch: WebSearchTool,
+  Write: WriteTool,
+  ReadMediaFile: ReadMediaFileTool,
+  select_tools: SelectToolsTool,
+  AskUserQuestion: AskUserQuestionTool,
+  CreateGoal: CreateGoalTool,
+  GetGoal: GetGoalTool,
+  UpdateGoal: UpdateGoalTool,
+  SetGoalBudget: SetGoalBudgetTool,
+  EnterPlanMode: EnterPlanModeTool,
+  ExitPlanMode: ExitPlanModeTool,
+  TaskList: TaskListTool,
+  TaskOutput: TaskOutputTool,
+  TaskStop: TaskStopTool,
 } as const;
 
 /**

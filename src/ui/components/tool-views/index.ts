@@ -33,6 +33,8 @@ import { GrepResultView } from "./GrepResultView";
 import { ListFilesResultView } from "./ListFilesResultView";
 import { TodoResultView } from "./TodoResultView";
 import { WebSearchResultView } from "./WebSearchResultView";
+import { WriteResultView } from "./WriteResultView";
+import { ReadMediaFileResultView } from "./ReadMediaFileResultView";
 import { MCPResultView } from "./MCPResultView";
 
 /**
@@ -186,6 +188,16 @@ export function getToolResultView(
       return (toolCall) =>
         React.createElement(GlobResultView, {
           result: toolCall.result as GlobSuccess,
+        });
+    case "Write":
+      return (toolCall) =>
+        React.createElement(WriteResultView, {
+          result: toolCall.result as any,
+        });
+    case "ReadMediaFile":
+      return (toolCall) =>
+        React.createElement(ReadMediaFileResultView, {
+          result: toolCall.result as any,
         });
     case "architect":
       return (toolCall) =>
