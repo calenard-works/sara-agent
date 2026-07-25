@@ -12,7 +12,7 @@ export interface UpdateResult {
 }
 
 /**
- * Try to find the globally installed sara-agent and read its CHANGELOG.md.
+ * Try to find the globally installed Sara and read its CHANGELOG.md.
  * Searches common global node_modules locations.
  */
 function findGlobalChangelog(): string | undefined {
@@ -43,7 +43,7 @@ function findGlobalChangelog(): string | undefined {
 
 export const updateCommand: CommandHandler<UpdateResult | undefined> = {
   name: "/update",
-  description: "Update sara-agent to the latest version",
+  description: "Update Sara to the latest version",
   execute: async (messages, llmClient, actions, onExecutePrompt, args) => {
     const startedAt = new Date().toISOString();
     const callId = `/update_${Date.now()}`;

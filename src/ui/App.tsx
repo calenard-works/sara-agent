@@ -149,7 +149,7 @@ export function App({ cwd, approvalMode }: AppProps) {
     }
   });
 
-  const handleSubmit = async (value: string): Promise<void> => {
+  const handleSubmit = useCallback(async (value: string): Promise<void> => {
     // Create abort controller for this request
     const ac = actions.createAbortController();
     actions.startRequest(value);
@@ -157,25 +157,6 @@ export function App({ cwd, approvalMode }: AppProps) {
     // Build session from current UI state (includes token usage)
     const session = buildSession();
 
-    // ========================================================================
-    // UI PERMISSION PROMISE TRACKING
-    // ========================================================================
-    // This is the UI side of the async permission flow. Here's how it connects
-    // to the executor's permission system:
-    //
-    // 1. PENDING PROMISES MAP:
-    //    - Key: requestId (tool call ID from LLM)
-    //    - Value: { resolve } function that completes the permission promise
-    //    - This map bridges the gap between async executor and UI state
-    //
-    // 2. FLOW CONNECTION:
-    //    - Executor calls onPermissionRequired() with a requestId
-    //    - requestUserApproval stores the resolver in this map
-    //    - UI shows permission prompt to user
-    //    - User clicks [a]pprove or [r]eject
-    //    - UI calls the stored resolve function with user's decision
-    //    - Executor's promise resolves and continues execution
-    //
     // Prepare callbacks for agent executor
     const callbacks: ExecutionCallbacks = {
       onGeneratingChange: (isGenerating: boolean) => {
@@ -198,25 +179,10 @@ export function App({ cwd, approvalMode }: AppProps) {
         actions.completeToolCall(result);
       },
 
-      // ========================================================================
-      // CRITICAL: ASYNC PERMISSION HANDLER
-      // ========================================================================
-      // This is where the async permission flow connects executor to UI.
-      // When a tool needs user approval, this callback gets called.
       onPermissionRequired: async (
         hint: PermissionUiHint,
         requestId: string,
       ) => {
-        // How it works:
-        // - requestUserApproval() registers a resolver in refs.pendingApprovals.current
-        //   and returns a promise that waits for user input
-        // - User sees [a]pprove/[r]eject prompt in UI
-        // - User makes decision → resolveApproval() is called → promise resolves
-        // - This function returns the decision to executor
-        // - Executor continues execution (or stops if rejected)
-        //
-        // Note: The tool call state has already been updated to "permission_required"
-        // by the executor before calling this callback, so the UI is ready
         const decision = await requestUserApproval(
           requestId,
           refs.pendingApprovals.current,
@@ -253,7 +219,7 @@ export function App({ cwd, approvalMode }: AppProps) {
       },
       callbacks,
     );
-  };
+  }, [actions, buildSession, getCurrentApprovalMode, cwd, refs.pendingApprovals]);
 
   // Execute prompt when set by commands (like /init)
   useEffect(() => {
@@ -265,7 +231,7 @@ export function App({ cwd, approvalMode }: AppProps) {
       // Execute the prompt through the normal handleSubmit flow
       handleSubmit(promptToExecute.trim());
     }
-  }, [state.promptToExecute, actions, handleSubmit]);
+  }, [state.promptToExecute, actions.executePrompt, handleSubmit]);
 
   /**
    * Handle user approval of a permission request.

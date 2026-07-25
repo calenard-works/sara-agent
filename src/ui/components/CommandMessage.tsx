@@ -319,7 +319,7 @@ export function CommandMessage({ commandMessage }: CommandMessageProps) {
     switch (status) {
       case "executing":
         iconColor = getCurrentTheme().secondary;
-        displayContent = <Text>updating sara-agent...</Text>;
+        displayContent = <Text>updating Sara...</Text>;
         break;
       case "success": {
         iconColor = getCurrentTheme().success;
@@ -445,7 +445,7 @@ export function CommandMessage({ commandMessage }: CommandMessageProps) {
       <Box marginTop={1} width={terminalWidth - 4} flexDirection="column">
         <Box flexDirection="row" gap={1}>
           <Text bold color={getCurrentTheme().brand}>
-            Welcome to sara-agent!
+            Welcome to Sara!
           </Text>
         </Box>
         <Box flexDirection="row" gap={1} marginTop={1}>

@@ -1,5 +1,5 @@
 /**
- * Current version of sara-agent
+ * Current version of Sara
  * Keep in sync with package.json
  */
 export const VERSION = "0.2.1";

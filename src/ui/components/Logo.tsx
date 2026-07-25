@@ -7,7 +7,7 @@ export function Logo() {
   return (
     <Box flexDirection="column">
       <Text color={getCurrentTheme().brand} bold>
-        sara-agent v{VERSION}
+        Sara v{VERSION}
       </Text>
     </Box>
   );
