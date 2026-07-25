@@ -88,30 +88,6 @@ export function Layout({
 
   const isInInteractiveMode = state.interactiveMode !== null;
 
-  /** Extract the latest `# Heading` from the streaming LLM content */
-  const thinkingHeading = useMemo(() => {
-    if (!state.isLLMGenerating) return undefined;
-    const msgs = state.messages;
-    for (let i = msgs.length - 1; i >= 0; i--) {
-      const m = msgs[i];
-      if (
-        m.kind === "api" &&
-        m.status === "streaming" &&
-        m.message.role === "assistant"
-      ) {
-        const content = m.message.content;
-        if (typeof content !== "string") return undefined;
-        const lines = content.split("\n");
-        for (let j = lines.length - 1; j >= 0; j--) {
-          const match = lines[j].match(/^#\s+(.+)/);
-          if (match) return match[1].trim();
-        }
-        return undefined;
-      }
-    }
-    return undefined;
-  }, [state.isLLMGenerating, state.messages]);
-
   /** Build a human-readable status label for the dots spinner */
   const statusLabel = useMemo(() => {
     // Tool execution phase
@@ -126,12 +102,11 @@ export function Layout({
 
     // LLM thinking phase
     if (state.isLLMGenerating) {
-      if (thinkingHeading) return thinkingHeading;
       return "Thinking...";
     }
 
     return undefined;
-  }, [state.isLLMGenerating, state.toolCalls, thinkingHeading]);
+  }, [state.isLLMGenerating, state.toolCalls]);
 
   const shouldShowStatus =
     !hasPermissionRequest && (state.isLLMGenerating || statusLabel !== undefined);
