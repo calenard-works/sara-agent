@@ -18,6 +18,8 @@ import { createClient } from "../llm/client";
 import { executeCommand } from "./commands/executor";
 import { CommandName } from "./commands";
 import { mcpService } from "../mcp";
+import { ConfigManager } from "../config";
+import { getAllProviders } from "../models/registry";
 
 export interface AppProps {
   cwd: string;
@@ -53,6 +55,50 @@ export function App({ cwd, approvalMode }: AppProps) {
       setError(error instanceof Error ? error.message : String(error));
     });
   }, [cwd, updateMCPServer, setError]);
+
+  // First-run detection: check if any API keys are configured
+  useEffect(() => {
+    // Check all known providers for API keys
+    const providers = ["deepseek", "openai", "glm", "opencode"];
+    const hasAnyKey = providers.some((p) => ConfigManager.getApiKey(p));
+
+    if (!hasAnyKey) {
+      // Add welcome message
+      const startedAt = new Date().toISOString();
+      actions.addCommandCall({
+        kind: "cmd" as const,
+        commandName: "/welcome" as any,
+        callId: `/welcome_${Date.now()}`,
+        status: "success" as const,
+        startedAt,
+        endedAt: startedAt,
+        result: undefined,
+      });
+
+      // Start login interactive mode
+      getAllProviders()
+        .then((allProviders) => {
+          actions.setInteractiveMode({
+            type: "login-provider",
+            providers: allProviders.map((p) => ({
+              id: p.id,
+              name: p.name,
+            })),
+          });
+        })
+        .catch(() => {
+          // Fallback: try to set interactive mode anyway
+          actions.setInteractiveMode({
+            type: "login-provider",
+            providers: [
+              { id: "deepseek", name: "DeepSeek" },
+              { id: "openai", name: "OpenAI" },
+              { id: "glm", name: "GLM (智谱AI)" },
+            ],
+          });
+        });
+    }
+  }, [actions]);
 
   // ========================================================================
   // AGENT EXECUTION STATE DETECTION

@@ -439,5 +439,29 @@ export function CommandMessage({ commandMessage }: CommandMessageProps) {
     );
   }
 
+  // Welcome message on first run
+  if (commandName === "/welcome") {
+    return (
+      <Box marginTop={1} width={terminalWidth - 4} flexDirection="column">
+        <Box flexDirection="row" gap={1}>
+          <Text bold color={getCurrentTheme().brand}>
+            Welcome to sara-agent!
+          </Text>
+        </Box>
+        <Box flexDirection="row" gap={1} marginTop={1}>
+          <Text>Get started by setting up your API key below.</Text>
+        </Box>
+        <Box flexDirection="row" gap={1}>
+          <Text dimColor>
+            You can also set it later with:{" "}
+          </Text>
+          <Text bold color={getCurrentTheme().secondary}>
+            /login &lt;provider&gt; &lt;api-key&gt;
+          </Text>
+        </Box>
+      </Box>
+    );
+  }
+
   return null;
 }
