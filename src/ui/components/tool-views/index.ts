@@ -20,6 +20,7 @@ import type {
   GrepSuccess,
   ListFilesSuccess,
   TodoSuccess,
+  WebSearchSuccess,
 } from "../../../tools/types";
 import type { ToolCall } from "../../../tools/runner.types";
 import { ArchitectResultView } from "./ArchitectResultView";
@@ -31,6 +32,7 @@ import { GlobResultView } from "./GlobResultView";
 import { GrepResultView } from "./GrepResultView";
 import { ListFilesResultView } from "./ListFilesResultView";
 import { TodoResultView } from "./TodoResultView";
+import { WebSearchResultView } from "./WebSearchResultView";
 import { MCPResultView } from "./MCPResultView";
 
 /**
@@ -153,6 +155,7 @@ export function getToolResultView(
           result: toolCall.result as BashSuccess,
         });
     case "fetch":
+    case "FetchURL":
       return (toolCall) =>
         React.createElement(FetchResultView, {
           result: toolCall.result as FetchSuccess,
@@ -188,6 +191,11 @@ export function getToolResultView(
       return (toolCall) =>
         React.createElement(ArchitectResultView, {
           result: toolCall.result as ArchitectSuccess,
+        });
+    case "WebSearch":
+      return (toolCall) =>
+        React.createElement(WebSearchResultView, {
+          result: toolCall.result as WebSearchSuccess,
         });
     case "todo_read":
     case "todo_write":

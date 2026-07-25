@@ -211,6 +211,20 @@ export type FetchResult =
     }
   | ToolErrorResult;
 
+export interface SearchResultItem {
+  title: string;
+  url: string;
+  snippet: string;
+}
+
+export type WebSearchResult =
+  | {
+      query: string;
+      results: SearchResultItem[];
+      totalResults: number;
+    }
+  | ToolErrorResult;
+
 /**
  * Helper types for success results only
  * These exclude error states and are used in UI components that only handle success cases
@@ -224,3 +238,4 @@ export type TodoSuccess = Exclude<TodoResult, ToolErrorResult>;
 export type FileEditSuccess = FileEditSuccessType;
 export type BashSuccess = Exclude<BashResult, ToolErrorResult>;
 export type FetchSuccess = Exclude<FetchResult, ToolErrorResult>;
+export type WebSearchSuccess = Exclude<WebSearchResult, ToolErrorResult>;
