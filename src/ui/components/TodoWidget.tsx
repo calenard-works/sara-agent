@@ -39,17 +39,20 @@ export function TodoWidget({ todos }: TodoWidgetProps) {
   if (todos.length === 0) return null;
 
   return (
-    <Box
-      flexDirection="column"
-      marginTop={1}
-      borderStyle="single"
-      borderColor={getCurrentTheme().secondary}
-      paddingX={1}
-    >
-      <Text bold color={getCurrentTheme().accent}>
-        Todo
-      </Text>
-      <Box flexDirection="column" marginTop={1}>
+    <Box flexDirection="column" marginTop={1}>
+      {/* "Todo" header as a small label box */}
+      <Box
+        borderStyle="single"
+        borderColor={getCurrentTheme().secondary}
+        paddingX={1}
+        paddingY={0}
+      >
+        <Text bold color={getCurrentTheme().accent}>
+          Todo
+        </Text>
+      </Box>
+      {/* Items below without border */}
+      <Box flexDirection="column" paddingX={1} marginTop={1}>
         {todos.map((t) => {
           const icon = getStatusIcon(t.status);
           const color = getStatusColor(t.status);

@@ -2,6 +2,7 @@ export function buildSystemPrompt(
   envDetails: string,
   projectContext: string = "",
   planMode: boolean = false,
+  skillsListing: string = "",
 ): string {
   const planInstructions = planMode ? `You are in PLAN MODE. In this mode, you MUST follow these rules:
 
@@ -157,5 +158,6 @@ The user will primarily request you perform software engineering tasks. This inc
 You MUST answer concisely with fewer than 4 lines of text (not including tool use or code generation), unless user asks for detail.
 
 ${envDetails}
+${skillsListing}
 `;
 }

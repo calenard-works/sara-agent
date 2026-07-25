@@ -3,6 +3,8 @@ import path from "path";
 
 import { buildSystemPrompt } from "./prompts";
 import { createClient } from "../llm/client";
+import { getSkillRegistry } from "../skills/registry";
+import { registerBuiltinSkills } from "../skills/builtin";
 import type { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 
 interface EnvironmentInfo {
@@ -61,6 +63,11 @@ export async function buildSystemMessage(
     }
   }
 
-  const systemPrompt = buildSystemPrompt(envDetails, projectContext, planMode);
+  // Load skills (builtins + project/user skills)
+  registerBuiltinSkills();
+  getSkillRegistry().loadRoots(effectiveCwd);
+
+  const skillsListing = getSkillRegistry().renderModelSkillListing();
+  const systemPrompt = buildSystemPrompt(envDetails, projectContext, planMode, skillsListing);
   return { role: "system", content: systemPrompt };
 }

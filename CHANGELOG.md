@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.6.0 (2026-07-25)
+
+### Added
+- Skills/plugins system — ported from kimi-code:
+  - Skill types (`src/skills/types.ts`) — SkillDefinition, SkillSource, SkillType
+  - Skill parser (`src/skills/parser.ts`) — YAML frontmatter + `$0`, `$1`, `$ARGUMENTS` placeholder expansion
+  - Skill scanner (`src/skills/scanner.ts`) — discovers `.md` and `SKILL.md` from `.sara/skills` / `.agents/skills`
+  - Skill registry (`src/skills/registry.ts`) — singleton with `getSkill()`, `listSkills()`, `renderModelSkillListing()`
+  - Skill tool (`src/tools/skill.ts`) — LLM-invokable tool that loads skill instructions inline (depth limit 3)
+  - Builtin skills: `check-sara-docs`, `update-config`, `write-goal`
+  - Skill listing auto-appended to system prompt when skills are available
+
+### Changed
+- Todo widget border: full box replaced with a small label border around "Todo" header, items below without border
+- Status bar separator dots: `●` (thick) → `·` (middle dot) for a cleaner look
+
 ## 0.5.0 (2026-07-25)
 
 ### Added

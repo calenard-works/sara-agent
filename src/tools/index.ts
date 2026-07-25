@@ -6,6 +6,7 @@ export * from "./glob";
 export * from "./fileEdit";
 export * from "./bash";
 export * from "./architect";
+export * from "./skill";
 export * from "./todo";
 export * from "./runner";
 export * from "./openai";
@@ -18,6 +19,7 @@ import { GlobTool } from "./glob";
 import { FileEditTool } from "./fileEdit";
 import { BashTool } from "./bash";
 import { ArchitectTool } from "./architect";
+import { SkillTool } from "./skill";
 import { TodoReadTool, TodoWriteTool } from "./todo";
 import { FetchTool } from "./fetch";
 import type { Tool } from "./types";
@@ -38,6 +40,7 @@ export const ALL_TOOLS = [
   FileEditTool,
   BashTool,
   ArchitectTool,
+  SkillTool,
   TodoReadTool,
   TodoWriteTool,
   FetchTool,
@@ -56,6 +59,7 @@ const TOOLS_BY_NAME = {
   fileEdit: FileEditTool,
   bash: BashTool,
   architect: ArchitectTool,
+  Skill: SkillTool,
   todo_read: TodoReadTool,
   todo_write: TodoWriteTool,
   fetch: FetchTool,
