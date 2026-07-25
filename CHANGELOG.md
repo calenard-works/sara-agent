@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.8.0 (2026-07-25)
+
+### Added
+- `FetchURL` tool — fetches web page content (HTTP/HTTPS), converts HTML to markdown
+- `WebSearch` tool — web search via DuckDuckGo HTML API, returns title/url/snippet
+
 ## 0.7.0 (2026-07-25)
 
 ### Added
