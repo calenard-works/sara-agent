@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.7.0 (2026-07-25)
+
+### Added
+- `/autoedit` command — switches approval mode to Auto-Edit (auto-approve file edits)
+- Command palette now shows max 6 items when typing `/` in the input
+
+### Changed
+- `/autoedit` and `/yolo` are now separate commands (previously only `/yolo` existed)
+
 ## 0.6.1 (2026-07-25)
 
 ### Fixed
