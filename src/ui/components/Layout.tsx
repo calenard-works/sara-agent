@@ -33,6 +33,23 @@ export interface LayoutProps {
   onExecuteCommand: (command: CommandName, args?: string) => Promise<void>;
 }
 
+/**
+ * Simple semver comparison — returns true if version `b` is newer than `a`.
+ * Handles "x.y.z" format. If parsing fails, falls back to string inequality.
+ */
+function isNewerVersion(current: string, latest: string): boolean {
+  const cur = current.split(".").map(Number);
+  const lat = latest.split(".").map(Number);
+  if (cur.length !== 3 || lat.length !== 3 || cur.some(isNaN) || lat.some(isNaN)) {
+    return latest !== current;
+  }
+  for (let i = 0; i < 3; i++) {
+    if (lat[i]! > cur[i]!) return true;
+    if (lat[i]! < cur[i]!) return false;
+  }
+  return false;
+}
+
 export function Layout({
   cwd,
   state,
@@ -121,7 +138,7 @@ export function Layout({
     })
       .then((res) => res.json())
       .then((data: { version?: string }) => {
-        if (data.version && data.version !== VERSION) {
+        if (data.version && isNewerVersion(VERSION, data.version)) {
           setUpdateAvailable(data.version);
         }
       })
