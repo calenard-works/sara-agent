@@ -8,8 +8,8 @@ import { GrepTool } from "./grep";
 import { BashTool } from "./bash";
 
 describe("Tools Registry", () => {
-  test("ALL_TOOLS contains all 11 tools", () => {
-    expect(ALL_TOOLS).toHaveLength(11);
+  test("ALL_TOOLS contains all 12 tools", () => {
+    expect(ALL_TOOLS).toHaveLength(12);
 
     const names = ALL_TOOLS.map((t) => t.name);
     expect(names).toContain("fileRead");
@@ -22,6 +22,8 @@ describe("Tools Registry", () => {
     expect(names).toContain("Skill");
     expect(names).toContain("todo_read");
     expect(names).toContain("todo_write");
+    expect(names).toContain("FetchURL");
+    expect(names).toContain("WebSearch");
   });
 
   test("getToolsByName can find tools by name", () => {
@@ -87,8 +89,8 @@ describe("OpenAI Format Conversion", () => {
   test("allToolsToOpenAIFormat batch converts all tools", () => {
     const openaiTools = allToolsToOpenAIFormat(ALL_TOOLS);
 
-    // Should convert all 11 tools
-    expect(openaiTools).toHaveLength(11);
+    // Should convert all 12 tools
+    expect(openaiTools).toHaveLength(12);
 
     // Each should be a valid OpenAI tool
     for (const tool of openaiTools) {

@@ -11,6 +11,8 @@ export * from "./todo";
 export * from "./runner";
 export * from "./openai";
 export * from "./fetch";
+export * from "./fetchUrl";
+export * from "./webSearch";
 
 import { FileReadTool } from "./fileRead";
 import { ListFilesTool } from "./listFiles";
@@ -22,6 +24,8 @@ import { ArchitectTool } from "./architect";
 import { SkillTool } from "./skill";
 import { TodoReadTool, TodoWriteTool } from "./todo";
 import { FetchTool } from "./fetch";
+import { FetchUrlTool } from "./fetchUrl";
+import { WebSearchTool } from "./webSearch";
 import type { Tool } from "./types";
 
 /**
@@ -43,7 +47,8 @@ export const ALL_TOOLS = [
   SkillTool,
   TodoReadTool,
   TodoWriteTool,
-  FetchTool,
+  FetchUrlTool,
+  WebSearchTool,
 ] as const;
 
 /**
@@ -63,6 +68,8 @@ const TOOLS_BY_NAME = {
   todo_read: TodoReadTool,
   todo_write: TodoWriteTool,
   fetch: FetchTool,
+  FetchURL: FetchUrlTool,
+  WebSearch: WebSearchTool,
 } as const;
 
 /**
