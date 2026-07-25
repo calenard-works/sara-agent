@@ -17,6 +17,7 @@ import { getCurrentTheme } from "../theme";
 import { ProviderSelector } from "./ProviderSelector";
 import { KeyInput } from "./KeyInput";
 import { SessionList } from "./SessionList";
+import { TodoWidget } from "./TodoWidget";
 import { fetchAllProviderModels } from "../../models/registry";
 
 export interface LayoutProps {
@@ -154,7 +155,7 @@ export function Layout({
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [state.modelRefreshKey]);
 
   // Check if user has any provider configured
   const hasProvider = useMemo(() => {
@@ -191,6 +192,14 @@ export function Layout({
             access.
           </Text>
         </Box>
+        {state.isPlanMode && (
+          <Box marginTop={1}>
+            <Text bold color={getCurrentTheme().warning}>
+              ═══ Plan Mode ═══
+            </Text>
+            <Text dimColor> — only planning, no changes</Text>
+          </Box>
+        )}
       </Box>
     );
   }, [cwd, hasProvider, modelDisplayName]);
@@ -225,6 +234,7 @@ export function Layout({
 
       actions.setInteractiveMode(null);
       actions.setError(undefined);
+      actions.refreshModel();
     },
     [state.interactiveMode, actions],
   );
@@ -276,6 +286,7 @@ export function Layout({
 
       actions.setInteractiveMode(null);
       actions.setError(undefined);
+      actions.refreshModel();
     },
     [state.interactiveMode, actions],
   );
@@ -342,6 +353,30 @@ export function Layout({
           />
         );
       }
+      case "permission-picker": {
+        const handleModeSelect = async (m: { id: string; name: string }) => {
+          const target = m.id;
+          const current = state.currentApprovalMode;
+          const order = ["default", "autoEdit", "yolo"];
+          const fromIdx = order.indexOf(current);
+          const toIdx = order.indexOf(target);
+          if (fromIdx !== -1 && toIdx !== -1) {
+            const cycles = (toIdx - fromIdx + 3) % 3;
+            for (let i = 0; i < cycles; i++) {
+              onCycleApprovalMode();
+            }
+          }
+          actions.setInteractiveMode(null);
+        };
+        return (
+          <ProviderSelector
+            title="Select permission mode:"
+            providers={mode.modes}
+            onSelect={handleModeSelect}
+            onCancel={handleInteractiveCancel}
+          />
+        );
+      }
     }
   };
 
@@ -386,6 +421,9 @@ export function Layout({
             <ErrorView message={state.error} />
           </Box>
         )}
+
+        {/* Todo widget - fixed above status bar */}
+        {!state.isLLMGenerating && <TodoWidget todos={state.todos} />}
 
         {shouldShowStatus && (
           <Box marginTop={1}>

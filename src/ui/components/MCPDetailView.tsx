@@ -36,7 +36,7 @@ const getStatusColor = (status: string) => {
 const getStatusSymbol = (status: string) => {
   switch (status) {
     case "connected":
-      return "•";
+      return "●";
     case "connecting":
       return "◐";
     case "error":

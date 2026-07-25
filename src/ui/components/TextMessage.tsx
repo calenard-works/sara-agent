@@ -30,9 +30,9 @@ export function TextMessage({ wrappedMessage, index }: TextMessageProps) {
   }
 
   // Determine icon and color based on role
-  // Using • instead of ⏺ for better terminal rendering compatibility
+  // Using ● instead of ⏺ for better terminal rendering compatibility
   // ⏺ character caused alignment issues in some terminals due to inconsistent width rendering
-  const icon = isUserMessage ? ">" : "•";
+  const icon = isUserMessage ? ">" : "●";
   let color: string | undefined = undefined;
 
   if (wrappedMessage.status === "error") {

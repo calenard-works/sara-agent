@@ -41,6 +41,8 @@ export interface ExecutionContext {
   getApprovalMode: () => ApprovalMode;
   /** Existing session record for conversation history */
   session: Session;
+  /** Whether plan mode is active (agent only plans, no tool execution) */
+  isPlanMode?: boolean;
 }
 
 /**

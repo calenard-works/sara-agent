@@ -148,6 +148,11 @@ export function MessageFeed({
         else if (message.role === "tool") {
           const toolCall = toolCallsById.get(message.tool_call_id);
           if (toolCall) {
+            // Skip todo tool messages - they're rendered in the todo widget
+            if (toolCall.toolName === "todo_write" || toolCall.toolName === "todo_read") {
+              displayedToolCallIds.add(message.tool_call_id);
+              return;
+            }
             processedMessages.push(
               <ToolMessage
                 key={`${areaPrefix}-tool-${message.tool_call_id}`}
@@ -181,6 +186,8 @@ export function MessageFeed({
     // These tool calls exist in toolCalls array but don't have corresponding tool messages yet
     toolCalls.forEach((call) => {
       if (!displayedToolCallIds.has(call.requestId)) {
+        // Skip todo tool calls - they're rendered in the todo widget
+        if (call.toolName === "todo_write" || call.toolName === "todo_read") return;
         // Only show tool calls that are still active (transient states)
         if (isTransientToolState(call.status)) {
           dynamicMsgs.push(

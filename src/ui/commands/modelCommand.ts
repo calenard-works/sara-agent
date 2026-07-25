@@ -41,6 +41,8 @@ export const modelCommand: CommandHandler<ModelResult> = {
             ConfigManager.set("llm.baseURL", provider.baseURL);
           }
           ConfigManager.setProvider(providerId);
+          // Refresh model display in header/status bar
+          actions.refreshModel();
 
           const completedCall = {
             ...commandCall,

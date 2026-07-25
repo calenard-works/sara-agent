@@ -1,21 +1,16 @@
-/**
- * Version Command
- *
- * Shows the current Sara version and description.
- */
+import type { CommandHandler } from "./command.types";
 
-import type { CommandHandler, VersionResult } from "./command.types";
-import { VERSION } from "../../version";
+export type PlanResult = string | undefined;
 
-export const versionCommand: CommandHandler<VersionResult | undefined> = {
-  name: "/version",
-  description: "Show version information",
-  execute: async (_messages, _llmClient, actions) => {
+export const planCommand: CommandHandler<PlanResult> = {
+  name: "/plan",
+  description: "Toggle plan mode — agent plans without executing any changes",
+  execute: async (_messages, _llmClient, actions, _onExecutePrompt, args) => {
     const startedAt = new Date().toISOString();
-    const callId = `/version_${Date.now()}`;
+    const callId = `/plan_${Date.now()}`;
     const commandCall = {
       kind: "cmd" as const,
-      commandName: "/version" as const,
+      commandName: "/plan" as const,
       callId,
       status: "executing" as const,
       startedAt,
@@ -23,19 +18,17 @@ export const versionCommand: CommandHandler<VersionResult | undefined> = {
     actions.addCommandCall(commandCall);
 
     try {
-      const result: VersionResult = {
-        version: VERSION,
-        description: "Sara - AI Coding Agent",
-      };
+      // Toggle plan mode
+      actions.togglePlanMode();
 
       const completedCall = {
         ...commandCall,
         status: "success" as const,
         endedAt: new Date().toISOString(),
-        result,
+        result: "Plan mode toggled",
       };
       actions.completeCommandCall(completedCall);
-      return result;
+      return "Plan mode toggled";
     } catch (error: unknown) {
       const errorCall = {
         ...commandCall,
@@ -44,7 +37,7 @@ export const versionCommand: CommandHandler<VersionResult | undefined> = {
         error: error instanceof Error ? error.message : "unknown error",
       };
       actions.completeCommandCall(errorCall);
+      return undefined;
     }
-    return undefined as VersionResult | undefined;
   },
 };

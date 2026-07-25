@@ -16,12 +16,15 @@ export type CommandName =
   | "/clear"
   | "/compact"
   | "/config"
+  | "/copy"
   | "/export"
   | "/help"
   | "/init"
   | "/mcp"
   | "/login"
   | "/model"
+  | "/permission"
+  | "/plan"
   | "/reload-tui"
   | "/sessions"
   | "/shell"
@@ -29,7 +32,8 @@ export type CommandName =
   | "/update"
   | "/usage"
   | "/version"
-  | "/welcome";
+  | "/welcome"
+  | "/yolo";
 
 /**
  * Command result types for each command
@@ -80,6 +84,14 @@ export type ExportResult = {
   messageCount: number;
 };
 
+export type CopyResult = string | undefined;
+
+export type PlanResult = string | undefined;
+
+export type PermissionResult = void;
+
+export type YoloResult = void;
+
 export type UpdateResult = {
   updated: boolean;
   version: string;
@@ -101,35 +113,43 @@ export type CommandConcreteResult<T extends CommandName> = T extends "/btw"
       ? CompactResult
       : T extends "/config"
         ? ConfigResult
-        : T extends "/export"
-          ? ExportResult
-          : T extends "/help"
-            ? HelpResult
-            : T extends "/init"
-              ? InitResult
-              : T extends "/mcp"
-                ? MCPResult
-                : T extends "/login"
-                  ? unknown
-                  : T extends "/model"
+        : T extends "/copy"
+          ? CopyResult
+          : T extends "/export"
+            ? ExportResult
+            : T extends "/help"
+              ? HelpResult
+              : T extends "/init"
+                ? InitResult
+                : T extends "/mcp"
+                  ? MCPResult
+                  : T extends "/login"
                     ? unknown
-                    : T extends "/reload-tui"
-                      ? void
-                      : T extends "/sessions"
-                        ? undefined
-                        : T extends "/shell"
-                          ? ShellResult
-                          : T extends "/status"
-                            ? StatusResult
-                            : T extends "/update"
-                              ? UpdateResult
-                              : T extends "/usage"
-                                ? UsageResult
-                                : T extends "/version"
-                                  ? VersionResult
-                                  : T extends "/welcome"
-                                    ? undefined
-                                    : never;
+                    : T extends "/model"
+                      ? unknown
+                      : T extends "/permission"
+                        ? PermissionResult
+                      : T extends "/plan"
+                        ? PlanResult
+                      : T extends "/yolo"
+                        ? YoloResult
+                        : T extends "/reload-tui"
+                          ? void
+                          : T extends "/sessions"
+                            ? undefined
+                            : T extends "/shell"
+                              ? ShellResult
+                              : T extends "/status"
+                                ? StatusResult
+                                : T extends "/update"
+                                  ? UpdateResult
+                                  : T extends "/usage"
+                                    ? UsageResult
+                                    : T extends "/version"
+                                      ? VersionResult
+                                      : T extends "/welcome"
+                                        ? undefined
+                                        : never;
 
 /**
  * Command call interface - represents a command execution

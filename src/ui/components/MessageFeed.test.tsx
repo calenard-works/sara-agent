@@ -73,7 +73,7 @@ describe("MessageFeed component", () => {
 
       const output = lastFrame();
       expect(output).toBeDefined();
-      expect(output).toContain("•");
+      expect(output).toContain("●");
       expect(output).toContain("User message");
       expect(output).toContain("Assistant response");
 

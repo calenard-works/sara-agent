@@ -35,6 +35,7 @@ export function isGitRepository(cwd: string): boolean {
 
 export async function buildSystemMessage(
   effectiveCwd: string,
+  planMode: boolean = false,
 ): Promise<ChatCompletionMessageParam> {
   // Build environment info
   const client = createClient();
@@ -60,6 +61,6 @@ export async function buildSystemMessage(
     }
   }
 
-  const systemPrompt = buildSystemPrompt(envDetails, projectContext);
+  const systemPrompt = buildSystemPrompt(envDetails, projectContext, planMode);
   return { role: "system", content: systemPrompt };
 }

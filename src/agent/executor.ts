@@ -272,7 +272,7 @@ export async function executeAgent(
   const sessionId = session.sessionId;
 
   // Build initial conversation context
-  const systemMessage = await buildSystemMessage(cwd);
+  const systemMessage = await buildSystemMessage(cwd, context.isPlanMode);
 
   // Combine system message, session messages, and current prompt
   const userPromptMessage = { role: "user" as const, content: prompt };

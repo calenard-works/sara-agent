@@ -223,14 +223,14 @@ export function SessionList({
                   <Box flexDirection="row" alignItems="center">
                     <Text color={color}>
                       {prefix}
-                      {isSelected ? "• " : ""}
+                      {isSelected ? "● " : ""}
                       {title}
                     </Text>
                   </Box>
                 )}
                 <Box flexDirection="row" gap={2}>
                   <Text dimColor>
-                    {timeStr} • {msgCount} messages
+                    {timeStr} ● {msgCount} messages
                   </Text>
                   {deleteConfirmIndex === index && (
                     <Text color={getCurrentTheme().error}>

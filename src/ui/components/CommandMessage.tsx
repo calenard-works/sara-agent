@@ -32,7 +32,7 @@ export function CommandMessage({ commandMessage }: CommandMessageProps) {
    * Toggles between the icon and a blank space to create a blinking effect
    */
   const [loadingIconIndex, setLoadingIconIndex] = useState(0);
-  const loadingIcons = useMemo(() => ["•", " "], []);
+  const loadingIcons = useMemo(() => ["●", " "], []);
 
   useEffect(() => {
     if (status !== "executing") {
@@ -115,7 +115,7 @@ export function CommandMessage({ commandMessage }: CommandMessageProps) {
       <Box marginTop={1} width={terminalWidth - 4}>
         <Box marginRight={1}>
           <Text color={iconColor}>
-            {status === "executing" ? loadingIcons[loadingIconIndex] : "•"}
+            {status === "executing" ? loadingIcons[loadingIconIndex] : "●"}
           </Text>
         </Box>
         <Box flexDirection="column">
@@ -150,7 +150,7 @@ export function CommandMessage({ commandMessage }: CommandMessageProps) {
       <Box marginTop={1} width={terminalWidth - 4}>
         <Box marginRight={1}>
           <Text color={iconColor}>
-            {status === "executing" ? loadingIcons[loadingIconIndex] : "•"}
+            {status === "executing" ? loadingIcons[loadingIconIndex] : "●"}
           </Text>
         </Box>
         <Box flexDirection="column">
@@ -198,7 +198,7 @@ export function CommandMessage({ commandMessage }: CommandMessageProps) {
       <Box marginTop={1} width={terminalWidth - 4}>
         <Box marginRight={1}>
           <Text color={iconColor}>
-            {status === "executing" ? loadingIcons[loadingIconIndex] : "•"}
+            {status === "executing" ? loadingIcons[loadingIconIndex] : "●"}
           </Text>
         </Box>
         <Box flexDirection="column">
@@ -299,7 +299,7 @@ export function CommandMessage({ commandMessage }: CommandMessageProps) {
       <Box marginTop={1} width={terminalWidth - 4}>
         <Box marginRight={1}>
           <Text color={iconColor}>
-            {status === "executing" ? loadingIcons[loadingIconIndex] : "•"}
+            {status === "executing" ? loadingIcons[loadingIconIndex] : "●"}
           </Text>
         </Box>
         <Box flexDirection="column">
@@ -363,7 +363,7 @@ export function CommandMessage({ commandMessage }: CommandMessageProps) {
       <Box marginTop={1} width={terminalWidth - 4}>
         <Box marginRight={1}>
           <Text color={iconColor}>
-            {status === "executing" ? loadingIcons[loadingIconIndex] : "•"}
+            {status === "executing" ? loadingIcons[loadingIconIndex] : "●"}
           </Text>
         </Box>
         <Box flexDirection="column">
@@ -484,7 +484,7 @@ export function CommandMessage({ commandMessage }: CommandMessageProps) {
       <Box marginTop={1} width={terminalWidth - 4}>
         <Box marginRight={1}>
           <Text color={iconColor}>
-            {status === "executing" ? loadingIcons[loadingIconIndex] : "•"}
+            {status === "executing" ? loadingIcons[loadingIconIndex] : "●"}
           </Text>
         </Box>
         <Box flexDirection="column">
@@ -539,7 +539,7 @@ export function CommandMessage({ commandMessage }: CommandMessageProps) {
       <Box marginTop={1} width={terminalWidth - 4}>
         <Box marginRight={1}>
           <Text color={iconColor}>
-            {status === "executing" ? loadingIcons[loadingIconIndex] : "•"}
+            {status === "executing" ? loadingIcons[loadingIconIndex] : "●"}
           </Text>
         </Box>
         <Box flexDirection="column">
@@ -616,7 +616,7 @@ export function CommandMessage({ commandMessage }: CommandMessageProps) {
       <Box marginTop={1} width={terminalWidth - 4}>
         <Box marginRight={1}>
           <Text color={iconColor}>
-            {status === "executing" ? loadingIcons[loadingIconIndex] : "•"}
+            {status === "executing" ? loadingIcons[loadingIconIndex] : "●"}
           </Text>
         </Box>
         <Box flexDirection="column">
@@ -671,7 +671,7 @@ export function CommandMessage({ commandMessage }: CommandMessageProps) {
       <Box marginTop={1} width={terminalWidth - 4}>
         <Box marginRight={1}>
           <Text color={iconColor}>
-            {status === "executing" ? loadingIcons[loadingIconIndex] : "•"}
+            {status === "executing" ? loadingIcons[loadingIconIndex] : "●"}
           </Text>
         </Box>
         <Box flexDirection="column">
@@ -713,7 +713,7 @@ export function CommandMessage({ commandMessage }: CommandMessageProps) {
       <Box marginTop={1} width={terminalWidth - 4}>
         <Box marginRight={1}>
           <Text color={iconColor}>
-            {status === "executing" ? loadingIcons[loadingIconIndex] : "•"}
+            {status === "executing" ? loadingIcons[loadingIconIndex] : "●"}
           </Text>
         </Box>
         <Box flexDirection="column">
@@ -755,7 +755,7 @@ export function CommandMessage({ commandMessage }: CommandMessageProps) {
       <Box marginTop={1} width={terminalWidth - 4}>
         <Box marginRight={1}>
           <Text color={iconColor}>
-            {status === "executing" ? loadingIcons[loadingIconIndex] : "•"}
+            {status === "executing" ? loadingIcons[loadingIconIndex] : "●"}
           </Text>
         </Box>
         <Box flexDirection="column">
@@ -795,5 +795,45 @@ export function CommandMessage({ commandMessage }: CommandMessageProps) {
     );
   }
 
-  return null;
+  // Generic fallback for commands without special rendering
+  let iconColor: string | undefined = undefined;
+  let displayContent: React.ReactNode = null;
+
+  switch (status) {
+    case "executing":
+      iconColor = getCurrentTheme().secondary;
+      displayContent = error ? (
+        <Text color={getCurrentTheme().error}>{error}</Text>
+      ) : null;
+      break;
+    case "success":
+      iconColor = getCurrentTheme().success;
+      if (result) {
+        displayContent = <Text>{String(result)}</Text>;
+      }
+      break;
+    case "error":
+      iconColor = getCurrentTheme().error;
+      displayContent = <Text color={getCurrentTheme().error}>{error || "Failed"}</Text>;
+      break;
+  }
+
+  return (
+    <Box marginTop={1} width={terminalWidth - 4}>
+      <Box marginRight={1}>
+        <Text color={iconColor}>
+          {status === "executing" ? loadingIcons[loadingIconIndex] : "●"}
+        </Text>
+      </Box>
+      <Box flexDirection="column">
+        <Text bold color={getCurrentTheme().accent}>{commandName}</Text>
+        <Box flexDirection="row">
+          <Box>
+            <Text>⎿{"  "}</Text>
+          </Box>
+          <Box flexDirection="column">{displayContent}</Box>
+        </Box>
+      </Box>
+    </Box>
+  );
 }

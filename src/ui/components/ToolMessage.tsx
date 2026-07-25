@@ -31,7 +31,7 @@ export function ToolMessage({
    * Toggles between the icon and a blank space to create a blinking effect
    */
   const [loadingIconIndex, setLoadingIconIndex] = useState(0);
-  const loadingIcons = useMemo(() => ["•", " "], []);
+  const loadingIcons = useMemo(() => ["●", " "], []);
 
   // NOTE: When debugging with DebugToolMessage (static mock data),
   // this useEffect can cause auto-scrolling to top which may interfere
@@ -65,7 +65,7 @@ export function ToolMessage({
         <Text color={color}>
           {toolCall.status === "executing"
             ? loadingIcons[loadingIconIndex]
-            : "•"}
+            : "●"}
         </Text>
       </Box>
       <Box flexDirection="column" flexGrow={1}>

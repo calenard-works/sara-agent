@@ -1,7 +1,11 @@
+import { planCommand } from "./planCommand";
+import { permissionCommand } from "./permissionCommand";
+import { yoloCommand } from "./yoloCommand";
 import { btwCommand } from "./btwCommand";
 import { clearCommand } from "./clearCommand";
 import { compactCommand } from "./compactCommand";
 import { configCommand } from "./configCommand";
+import { copyCommand } from "./copyCommand";
 import { exportCommand } from "./exportCommand";
 import { helpCommand } from "./helpCommand";
 import { initCommand } from "./initCommand";
@@ -25,18 +29,22 @@ export const ALL_COMMANDS = [
   clearCommand,
   compactCommand,
   configCommand,
+  copyCommand,
   exportCommand,
   helpCommand,
   initCommand,
   loginCommand,
   mcpCommand,
   modelCommand,
+  permissionCommand,
+  planCommand,
   reloadTuiCommand,
   sessionsCommand,
   statusCommand,
   updateCommand,
   usageCommand,
   versionCommand,
+  yoloCommand,
 ] as const;
 
 /**
@@ -53,18 +61,22 @@ export const COMMANDS_BY_NAME: Partial<Record<CommandName, AnyCommandHandler>> =
   "/clear": clearCommand,
   "/compact": compactCommand,
   "/config": configCommand,
+  "/copy": copyCommand,
   "/export": exportCommand,
   "/help": helpCommand,
   "/init": initCommand,
   "/login": loginCommand,
   "/mcp": mcpCommand,
   "/model": modelCommand,
+  "/permission": permissionCommand,
+  "/plan": planCommand,
   "/reload-tui": reloadTuiCommand,
   "/sessions": sessionsCommand,
   "/status": statusCommand,
   "/update": updateCommand,
   "/usage": usageCommand,
   "/version": versionCommand,
+  "/yolo": yoloCommand,
 };
 
 // Re-export types and executor

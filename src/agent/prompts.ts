@@ -1,10 +1,35 @@
 export function buildSystemPrompt(
   envDetails: string,
   projectContext: string = "",
+  planMode: boolean = false,
 ): string {
+  const planInstructions = planMode ? `You are in PLAN MODE. In this mode, you MUST follow these rules:
+
+## Plan Mode Rules
+
+1. ANALYZE FIRST - Before suggesting any changes, thoroughly analyze the codebase using read-only tools (Read, Grep, Glob, listFiles). Understand the current code structure, patterns, and conventions.
+
+2. DO NOT make any edits, file writes, or execute any commands that modify the system. You are in planning mode - only read and analyze.
+
+3. Create a detailed plan covering:
+   - What needs to be changed
+   - Which files need to be modified
+   - The approach and implementation strategy
+   - Potential risks and edge cases
+   - Steps for implementation
+
+4. Format your plan clearly with sections, file paths, and step-by-step instructions.
+
+5. After presenting the plan, ask the user if they'd like to proceed with execution.
+
+6. If the user approves, they will exit plan mode and rerun the task.
+
+REMEMBER: Read-only tools only. No edits, no writes, no bash commands that modify anything.
+` : "";
+
   return `
 You are an interactive CLI tool that helps users with software engineering tasks. Use the instructions below and the tools available to you to assist the user.
-
+${planInstructions}
 # Memory
 
 If the current working directory contains a file called AGENTS.md, it will be automatically added to your context. This file serves multiple purposes:

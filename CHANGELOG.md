@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.5.0 (2026-07-25)
+
+### Added
+- `/copy` command — copy content to clipboard
+- `/permission` command — change approval mode (default/autoEdit/yolo) with interactive picker
+- `/plan` command — toggle plan mode (agent plans without executing)
+- `/yolo` command — switch directly to YOLO approval mode
+- Plan mode indicator in header ("═══ Plan Mode ═══")
+- Fixed todo widget — todo list rendered as a pinned panel above the prompt input instead of inline in the message feed
+- Model picker shows only 6 models at a time with scroll arrows
+
+### Changed
+- All decorative UI dots replaced with fat dots (`●` instead of `•`)
+- Model name in header updates in real-time when changed via `/model`
+
+### Fixed
+- `/usage` command now properly registers and displays its result in the feed
+- `/version` command now properly registers and displays its result in the feed
+- Todo tool messages no longer clutter the message feed (rendered in dedicated widget)
+
 ## 0.4.0 (2026-07-25)
 
 ### Added

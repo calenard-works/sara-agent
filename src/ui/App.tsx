@@ -10,6 +10,7 @@ import type { LLMMessage } from "../sessions/types";
 import type { ApprovalMode } from "../config";
 import type { PermissionUiHint, PermissionOption } from "../permissions/types";
 import { isTransientToolState } from "../tools/runner.types";
+import type { TodoItem } from "../tools/types";
 import {
   requestUserApproval,
   resolveApproval,
@@ -269,6 +270,16 @@ export function App({ cwd, approvalMode, resumeSessionId }: AppProps) {
 
       onToolComplete: async (result) => {
         actions.completeToolCall(result);
+        // If todo tool completed, extract todos and update widget state
+        if (
+          result.status === "success" &&
+          (result.toolName === "todo_write" || result.toolName === "todo_read")
+        ) {
+          const todosResult = result.result as { todos?: TodoItem[] } | undefined;
+          if (todosResult?.todos) {
+            actions.updateTodos(todosResult.todos);
+          }
+        }
       },
 
       onPermissionRequired: async (
@@ -308,6 +319,7 @@ export function App({ cwd, approvalMode, resumeSessionId }: AppProps) {
         signal: ac.signal,
         getApprovalMode: getCurrentApprovalMode,
         session: session,
+        isPlanMode: state.isPlanMode,
       },
       callbacks,
     );

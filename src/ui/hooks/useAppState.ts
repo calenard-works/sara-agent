@@ -18,6 +18,7 @@ import {
 import { formatToolResultMessage } from "../../agent/formatters";
 import { CommandCall } from "../commands";
 import type { MCPServerState } from "../../mcp/client";
+import type { TodoItem } from "../../tools/types";
 
 // Simplified MCP state updates
 function updateMCPServers(
@@ -56,7 +57,8 @@ export type InteractiveMode =
       provider: { id: string; name: string };
       models: { id: string; name: string }[];
     }
-  | { type: "sessions-list"; sessions: Session[] };
+  | { type: "sessions-list"; sessions: Session[] }
+  | { type: "permission-picker"; modes: { id: string; name: string }[] };
 
 export type AppState = {
   isLLMGenerating: boolean;
@@ -93,6 +95,15 @@ export type AppState = {
 
   /** MCP servers state */
   mcp: MCPServerState[];
+
+  /** Current todo list for the widget */
+  todos: TodoItem[];
+
+  /** Counter that increments when model/provider changes (forces re-render of model display) */
+  modelRefreshKey: number;
+
+  /** Whether plan mode is active (agent only plans, no tool execution) */
+  isPlanMode: boolean;
 };
 
 /**
@@ -137,6 +148,9 @@ type Action =
   | { type: "MCP_SERVER_UPDATE"; payload: MCPServerState }
   | { type: "SET_INTERACTIVE_MODE"; mode: InteractiveMode }
   | { type: "CLEAR_INTERACTIVE_MODE" }
+  | { type: "REFRESH_MODEL" }
+  | { type: "TOGGLE_PLAN_MODE" }
+  | { type: "UPDATE_TODOS"; todos: TodoItem[] }
   | {
       type: "LOAD_SESSION";
       sessionId: string;
@@ -514,6 +528,24 @@ function reducer(state: AppState, action: Action): AppState {
         interactiveMode: null,
       };
 
+    case "REFRESH_MODEL":
+      return {
+        ...state,
+        modelRefreshKey: state.modelRefreshKey + 1,
+      };
+
+    case "TOGGLE_PLAN_MODE":
+      return {
+        ...state,
+        isPlanMode: !state.isPlanMode,
+      };
+
+    case "UPDATE_TODOS":
+      return {
+        ...state,
+        todos: action.todos,
+      };
+
     case "LOAD_SESSION":
       return {
         ...state,
@@ -638,6 +670,9 @@ export function useAppState(initialApprovalMode: ApprovalMode = "default") {
     clearNum: 0,
     mcp: [],
     interactiveMode: null,
+    modelRefreshKey: 0,
+    isPlanMode: false,
+    todos: [],
   });
 
   const abortRef = useRef<AbortController | null>(null);
@@ -852,6 +887,27 @@ export function useAppState(initialApprovalMode: ApprovalMode = "default") {
 
     clearInteractiveMode: useCallback(() => {
       dispatch({ type: "CLEAR_INTERACTIVE_MODE" });
+    }, []),
+
+    /**
+     * Refresh model display (call after model/provider changes).
+     */
+    refreshModel: useCallback(() => {
+      dispatch({ type: "REFRESH_MODEL" });
+    }, []),
+
+    /**
+     * Toggle plan mode on/off.
+     */
+    togglePlanMode: useCallback(() => {
+      dispatch({ type: "TOGGLE_PLAN_MODE" });
+    }, []),
+
+    /**
+     * Update the todo list for the widget.
+     */
+    updateTodos: useCallback((todos: TodoItem[]) => {
+      dispatch({ type: "UPDATE_TODOS", todos });
     }, []),
 
     /**

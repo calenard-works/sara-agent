@@ -135,19 +135,19 @@ export function HelpBar({
               )}
               {modelName && (
                 <>
-                  <Text dimColor>•</Text>
+                  <Text dimColor>●</Text>
                   <Text dimColor>{modelName}</Text>
                 </>
               )}
               {dirName && (
                 <>
-                  <Text dimColor>•</Text>
+                  <Text dimColor>●</Text>
                   <Text dimColor>{dirName}</Text>
                 </>
               )}
               {gitBranch && (
                 <>
-                  <Text dimColor>•</Text>
+                  <Text dimColor>●</Text>
                   <Text dimColor>{gitBranch}</Text>
                 </>
               )}
@@ -176,17 +176,17 @@ export function HelpBar({
                     <>
                       {connected > 0 && (
                         <Text dimColor color={getCurrentTheme().success}>
-                          • MCP {connected}
+                          ● MCP {connected}
                         </Text>
                       )}
                       {connecting > 0 && (
                         <Text dimColor color={getCurrentTheme().warning}>
-                          • MCP {connecting}
+                          ● MCP {connecting}
                         </Text>
                       )}
                       {errorState > 0 && (
                         <Text dimColor color={getCurrentTheme().error}>
-                          • MCP {errorState}
+                          ● MCP {errorState}
                         </Text>
                       )}
                     </>
