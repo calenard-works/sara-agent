@@ -80,6 +80,7 @@ export function PromptInput({
     useState<number>(0);
 
   const [selectedCommandIndex, setSelectedCommandIndex] = useState<number>(0);
+  const [commandScrollOffset, setCommandScrollOffset] = useState<number>(0);
 
   const [isExternalEditing, setIsExternalEditing] = useState<boolean>(false);
 
@@ -274,11 +275,11 @@ export function PromptInput({
     );
   }, [valueRef.current, cursorRef.current]);
 
-  // Limit to 6 displayed commands
-  const displayedCommands = useMemo(
-    () => filteredCommands.slice(0, 6),
-    [filteredCommands],
-  );
+  // Maximum visible commands before scrolling
+  const MAX_VISIBLE_COMMANDS = 8;
+
+  // Displayed commands (all filtered, UI clips via scroll offset)
+  const displayedCommands = filteredCommands;
 
   // Determine if command palette should be shown
   const shouldShowCommandPalette = displayedCommands.length > 0;
@@ -415,12 +416,24 @@ export function PromptInput({
       // Handle command palette navigation when active
       if (shouldShowCommandPalette) {
         if (key.upArrow) {
-          setSelectedCommandIndex((prev) => Math.max(0, prev - 1));
+          setSelectedCommandIndex((prev) => {
+            const next = Math.max(0, prev - 1);
+            // Scroll up when selection moves above visible window
+            if (next < commandScrollOffset) {
+              setCommandScrollOffset(next);
+            }
+            return next;
+          });
           return;
         } else if (key.downArrow) {
-          setSelectedCommandIndex((prev) =>
-            Math.min(displayedCommands.length - 1, prev + 1),
-          );
+          setSelectedCommandIndex((prev) => {
+            const next = Math.min(displayedCommands.length - 1, prev + 1);
+            // Scroll down when selection moves below visible window
+            if (next >= commandScrollOffset + MAX_VISIBLE_COMMANDS) {
+              setCommandScrollOffset(next - MAX_VISIBLE_COMMANDS + 1);
+            }
+            return next;
+          });
           return;
         } else if (key.return) {
           handleCommandSelect(selectedCommandIndex);
@@ -651,6 +664,8 @@ export function PromptInput({
         <CommandPalette
           selectedIndex={selectedCommandIndex}
           commands={displayedCommands}
+          scrollOffset={commandScrollOffset}
+          visibleCount={MAX_VISIBLE_COMMANDS}
         />
       )}
 

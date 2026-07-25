@@ -5,12 +5,20 @@ import { type CommandHandler } from "../commands";
 export interface CommandPaletteProps {
   selectedIndex: number;
   commands: CommandHandler<any>[];
+  scrollOffset?: number;
+  visibleCount?: number;
 }
 
 export function CommandPalette({
   selectedIndex,
   commands,
+  scrollOffset = 0,
+  visibleCount = 8,
 }: CommandPaletteProps) {
+  const total = commands.length;
+  const visible = commands.slice(scrollOffset, scrollOffset + visibleCount);
+  const isScrolled = scrollOffset > 0 || scrollOffset + visibleCount < total;
+
   return (
     <Box
       flexDirection="column"
@@ -18,13 +26,14 @@ export function CommandPalette({
       paddingX={1}
     >
       <Box flexDirection="column">
-        {commands.map((command, index) => {
-          const isSelected = index === selectedIndex;
+        {visible.map((command, viewIndex) => {
+          const realIndex = scrollOffset + viewIndex;
+          const isSelected = realIndex === selectedIndex;
           const color = isSelected ? getCurrentTheme().accent : undefined;
 
           return (
             <Box key={command.name} flexDirection="row">
-              <Box width={10} marginRight={2}>
+              <Box width={14} marginRight={2}>
                 <Text color={color}>{command.name}</Text>
               </Box>
               <Box flexGrow={1}>
@@ -35,6 +44,17 @@ export function CommandPalette({
             </Box>
           );
         })}
+
+        {isScrolled && (
+          <Box marginTop={1}>
+            <Text dimColor>
+              {scrollOffset > 0 ? "↑ " : ""}
+              {scrollOffset + visibleCount < total
+                ? `↓ ${total} commands total`
+                : ""}
+            </Text>
+          </Box>
+        )}
       </Box>
     </Box>
   );
