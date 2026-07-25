@@ -8,6 +8,7 @@ import { compactCommand } from "./compactCommand";
 import { configCommand } from "./configCommand";
 import { copyCommand } from "./copyCommand";
 import { exportCommand } from "./exportCommand";
+import { goalCommand } from "./goalCommand";
 import { helpCommand } from "./helpCommand";
 import { initCommand } from "./initCommand";
 import { loginCommand } from "./loginCommand";
@@ -16,6 +17,7 @@ import { modelCommand } from "./modelCommand";
 import { reloadTuiCommand } from "./reloadTuiCommand";
 import { sessionsCommand } from "./sessionsCommand";
 import { statusCommand } from "./statusCommand";
+import { tasksCommand } from "./tasksCommand";
 import { updateCommand } from "./updateCommand";
 import { usageCommand } from "./usageCommand";
 import { versionCommand } from "./versionCommand";
@@ -33,6 +35,7 @@ export const ALL_COMMANDS = [
   configCommand,
   copyCommand,
   exportCommand,
+  goalCommand,
   helpCommand,
   initCommand,
   loginCommand,
@@ -43,6 +46,7 @@ export const ALL_COMMANDS = [
   reloadTuiCommand,
   sessionsCommand,
   statusCommand,
+  tasksCommand,
   updateCommand,
   usageCommand,
   versionCommand,
@@ -66,6 +70,7 @@ export const COMMANDS_BY_NAME: Partial<Record<CommandName, AnyCommandHandler>> =
   "/config": configCommand,
   "/copy": copyCommand,
   "/export": exportCommand,
+  "/goal": goalCommand,
   "/help": helpCommand,
   "/init": initCommand,
   "/login": loginCommand,
@@ -76,6 +81,7 @@ export const COMMANDS_BY_NAME: Partial<Record<CommandName, AnyCommandHandler>> =
   "/reload-tui": reloadTuiCommand,
   "/sessions": sessionsCommand,
   "/status": statusCommand,
+  "/tasks": tasksCommand,
   "/update": updateCommand,
   "/usage": usageCommand,
   "/version": versionCommand,

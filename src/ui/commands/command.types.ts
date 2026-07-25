@@ -19,6 +19,7 @@ export type CommandName =
   | "/config"
   | "/copy"
   | "/export"
+  | "/goal"
   | "/help"
   | "/init"
   | "/mcp"
@@ -30,6 +31,7 @@ export type CommandName =
   | "/sessions"
   | "/shell"
   | "/status"
+  | "/tasks"
   | "/update"
   | "/usage"
   | "/version"
@@ -80,6 +82,10 @@ export type UsageResult = {
   contextLimit: number;
 };
 
+export type GoalResult = string | undefined;
+
+export type TasksResult = string | undefined;
+
 export type ExportResult = {
   path: string;
   messageCount: number;
@@ -120,7 +126,9 @@ export type CommandConcreteResult<T extends CommandName> = T extends "/autoedit"
           ? CopyResult
           : T extends "/export"
             ? ExportResult
-            : T extends "/help"
+            : T extends "/goal"
+              ? GoalResult
+              : T extends "/help"
               ? HelpResult
               : T extends "/init"
                 ? InitResult
@@ -144,7 +152,9 @@ export type CommandConcreteResult<T extends CommandName> = T extends "/autoedit"
                               ? ShellResult
                               : T extends "/status"
                                 ? StatusResult
-                                : T extends "/update"
+                                : T extends "/tasks"
+                                  ? TasksResult
+                                  : T extends "/update"
                                   ? UpdateResult
                                   : T extends "/usage"
                                     ? UsageResult
