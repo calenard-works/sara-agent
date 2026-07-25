@@ -135,13 +135,18 @@ export function Layout({
     return (
       <Box flexDirection="column">
         <Logo />
-        <Box flexDirection="row" gap={1} marginTop={1}>
-          <Text color={getCurrentTheme().secondary}>Dir:</Text>
-          <Text>{cwd}</Text>
+        <Box marginTop={1}>
+          <Text dimColor>{cwd}</Text>
         </Box>
-        <Box flexDirection="row" gap={1}>
-          <Text color={getCurrentTheme().secondary}>Model:</Text>
-          <Text>{modelName}</Text>
+        <Box>
+          <Text dimColor>{modelName}</Text>
+        </Box>
+        <Box marginTop={1}>
+          <Text dimColor>
+            Sara is a coding assistant that runs in your terminal. It helps you
+            write, debug, and refactor code using AI agents with full tool
+            access.
+          </Text>
         </Box>
       </Box>
     );

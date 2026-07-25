@@ -11,7 +11,6 @@ import { HelpBar } from "./HelpBar";
 import { openExternalEditor } from "../utils/externalEditor";
 import type { AppState, AppActions } from "../hooks/useAppState";
 import { ALL_COMMANDS, CommandName, COMMANDS_BY_NAME } from "../commands";
-import { VERSION } from "../../version";
 import { calculateMentionContext } from "../../mentions/context";
 
 /**
@@ -648,7 +647,6 @@ export function PromptInput({
           mcp={state.mcp}
           message={escTips}
           tokenUsage={state.tokenUsage}
-          version={VERSION}
         />
       )}
     </Box>
