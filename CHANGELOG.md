@@ -1,19 +1,51 @@
 # Changelog
 
+## 0.2.3 (2026-07-25)
+
+### Added
+- Dots spinner animation (`⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏`) replacing the old `◐◓◑◒`
+- Smart status indicator during agent execution:
+  - Extracts `# Heading` from streaming LLM response as live status
+  - Shows "Thinking..." when LLM starts generating
+  - Shows "Working..." for non-Bash tool execution
+  - Shows "Running..." for Bash tool execution
+- "esc to cancel" hint shown in the help bar (replaces "? for shortcuts") while agent is busy
+
+### Fixed
+- Cascading re-renders caused by unmemoized `handleSubmit` in App.tsx
+- TypeScript type errors with `/welcome` command — added to `CommandName` union
+- Incorrect stale closures in `processInput` dependency array
+
+### Changed
+- Header label from "sara-agent" to "Sara"
+- User-facing text throughout the UI uses "Sara" instead of "sara-agent"
+- Changelog format now uses structured sections (`### Added`, `### Fixed`, etc.)
+- Update command shows only the current version's release notes instead of the entire changelog
+
+## 0.2.2 (2026-07-25)
+
+### Fixed
+- Header display: "Sara v0.2.2" instead of "sara-agent v0.2.1"
+
 ## 0.2.1 (2026-07-25)
 
-- Fix infinite re-render loop on startup (first-run detection)
+### Fixed
+- Infinite re-render loop on startup (first-run detection)
 
 ## 0.2.0 (2026-07-25)
 
+### Added
 - Version display in TUI status bar (gray)
 - Automatic update notification when new version is available
 - `/update` command — self-update via npm
 - First-run welcome message and auto-login prompt
+
+### Changed
 - Binary renamed from `sara-agent` to `sara`
 
 ## 0.1.0 (2026-07-25)
 
+### Added
 - Initial release of sara-agent
 - Multi-LLM support (DeepSeek, OpenAI, GLM, and compatible APIs)
 - Complete tool system (file operations, search, command execution)

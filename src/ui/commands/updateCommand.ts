@@ -12,6 +12,23 @@ export interface UpdateResult {
 }
 
 /**
+ * Parse the full changelog text and return only the entry for a specific version.
+ * Looks for `## version` header and extracts until the next `## ` or end of file.
+ */
+function extractVersionNotes(
+  changelog: string,
+  version: string,
+): string | undefined {
+  // Escape dots in version for regex
+  const escaped = version.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const regex = new RegExp(
+    `(##\\s+${escaped}\\s*\\([^)]*\\)[\\s\\S]*?)(?=\\n##\\s|\\n*$)`,
+  );
+  const match = changelog.match(regex);
+  return match?.[1]?.trim() || undefined;
+}
+
+/**
  * Try to find the globally installed Sara and read its CHANGELOG.md.
  * Searches common global node_modules locations.
  */
@@ -76,7 +93,10 @@ export const updateCommand: CommandHandler<UpdateResult | undefined> = {
       // Read changelog from the newly installed package
       let releaseNotes: string | undefined;
       try {
-        releaseNotes = findGlobalChangelog();
+        const fullChangelog = findGlobalChangelog();
+        if (fullChangelog) {
+          releaseNotes = extractVersionNotes(fullChangelog, latestVersion);
+        }
       } catch {
         // ignore
       }
