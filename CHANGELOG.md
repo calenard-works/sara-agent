@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.0 (2026-07-25)
+
+- Version display in TUI status bar (gray)
+- Automatic update notification when new version is available
+- `/update` command — self-update via npm
+- First-run welcome message and auto-login prompt
+- Binary renamed from `sara-agent` to `sara`
+
 ## 0.1.0 (2026-07-25)
 
 - Initial release of sara-agent
