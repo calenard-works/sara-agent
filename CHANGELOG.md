@@ -1,17 +1,28 @@
 # Changelog
 
+## 0.3.2 (2026-07-25)
+
+### Added
+- Headers now show human-readable model names (e.g. "DeepSeek V3" instead of "deepseek-chat")
+- First-run state shows "not signed, run /login" instead of a model ID
+- Completely redesigned two-line status bar: approval mode, model name, dir, git branch, context usage, and hints
+
+### Changed
+- Status bar no longer shows version number
+- Header description text added below the model line
+
 ## 0.3.1 (2026-07-25)
 
 ### Added
 - Shell mode — type `!` on empty input to get a purple-bordered shell prompt; everything after `!` runs as a shell command
 - Base URL shown in gray next to each provider in the `/login` provider selector
-- New status bar at the bottom: shows approval mode, human-readable model name, directory basename, git branch, and token context usage
-- Human-readable model names in header (e.g. "DeepSeek V3" instead of "deepseek-chat")
+- Status bar shows approval mode, model name, directory, git branch, context usage
+- Human-readable model names in header
 - First-run state shows "not signed, run /login" instead of a model ID
 
 ### Changed
-- Bottom status bar completely redesigned with two-line layout: info on left, hints/context on right
-- Version removed from the status bar (still in header and `sara -V`)
+- Bottom status bar redesigned with two-line layout
+- Version removed from the status bar
 
 ### Fixed
 - Publish workflow — version bumped to publish pending changes
