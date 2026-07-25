@@ -73,13 +73,38 @@ export type VersionResult = {
   description: string;
 };
 
-export type UsageResult = {
-  version: string;
-  model: string;
-  promptTokens: number;
-  completionTokens: number;
+export type ModelUsageEntry = {
+  /** Full provider/model identifier, e.g. "opencode/deepseek-v4-flash-free" */
+  id: string;
+  /** Human-readable model name */
+  displayName: string;
+  /** Input tokens */
+  inputTokens: number;
+  /** Output tokens */
+  outputTokens: number;
+  /** Total tokens */
   totalTokens: number;
+  /** Formatted input token string with SI suffix */
+  inputFormatted: string;
+  /** Formatted output token string with SI suffix */
+  outputFormatted: string;
+  /** Formatted total token string with SI suffix */
+  totalFormatted: string;
+};
+
+export type UsageResult = {
+  models: ModelUsageEntry[];
+  /** Aggregate totals */
+  totalInputTokens: number;
+  totalOutputTokens: number;
+  totalTokens: number;
+  totalInputFormatted: string;
+  totalOutputFormatted: string;
+  totalFormatted: string;
+  /** Context window */
   contextLimit: number;
+  contextPercent: number;
+  contextUsed: number;
 };
 
 export type GoalResult = string | undefined;

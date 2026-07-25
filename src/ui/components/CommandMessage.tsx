@@ -568,35 +568,98 @@ export function CommandMessage({ commandMessage }: CommandMessageProps) {
       case "success": {
         iconColor = getCurrentTheme().success;
         const usageResult = result as UsageResult | undefined;
-        if (usageResult) {
-          const percent = Math.round(
-            (usageResult.totalTokens / usageResult.contextLimit) * 100,
+        if (usageResult && usageResult.models.length > 0) {
+          // Build model rows
+          const modelRows = usageResult.models.map((m, i) => (
+            <Box key={i} flexDirection="row" marginLeft={2}>
+              <Box width={terminalWidth - 14}>
+                <Text>
+                  <Text dimColor>{m.id}</Text>
+                  {"  "}
+                  <Text dimColor>input </Text>
+                  <Text>{m.inputFormatted}</Text>
+                  {"  "}
+                  <Text dimColor>output </Text>
+                  <Text>{m.outputFormatted}</Text>
+                  {"  "}
+                  <Text dimColor>total </Text>
+                  <Text>{m.totalFormatted}</Text>
+                </Text>
+              </Box>
+            </Box>
+          ));
+
+          // Total row
+          const totalRow = (
+            <Box key="total" flexDirection="row" marginLeft={2} marginTop={0}>
+              <Box width={terminalWidth - 14}>
+                <Text bold>
+                  total{"  "}
+                  <Text dimColor>input </Text>
+                  <Text>{usageResult.totalInputFormatted}</Text>
+                  {"  "}
+                  <Text dimColor>output </Text>
+                  <Text>{usageResult.totalOutputFormatted}</Text>
+                  {"  "}
+                  <Text dimColor>total </Text>
+                  <Text>{usageResult.totalFormatted}</Text>
+                </Text>
+              </Box>
+            </Box>
           );
-          const rows: React.ReactNode[] = [
-            <Box key="version" flexDirection="row" gap={1}>
-              <Text bold>Version:</Text>
-              <Text>{usageResult.version}</Text>
-            </Box>,
-            <Box key="model" flexDirection="row" gap={1}>
-              <Text bold>Model:</Text>
-              <Text>{usageResult.model}</Text>
-            </Box>,
-            <Box key="tokens" flexDirection="row" gap={1}>
-              <Text bold>Tokens:</Text>
-              <Text>
-                {usageResult.promptTokens} prompt +{" "}
-                {usageResult.completionTokens} completion ={" "}
-                {usageResult.totalTokens} total
-              </Text>
-            </Box>,
-            <Box key="context" flexDirection="row" gap={1}>
-              <Text bold>Context:</Text>
-              <Text>
-                {percent}% ({usageResult.totalTokens}/{usageResult.contextLimit})
-              </Text>
-            </Box>,
-          ];
-          displayContent = <Box flexDirection="column">{rows}</Box>;
+
+          // Context window progress bar
+          const barWidth = 20;
+          const filledCount = Math.round(
+            (usageResult.contextPercent / 100) * barWidth,
+          );
+          const emptyCount = barWidth - filledCount;
+          const bar =
+            "█".repeat(filledCount) + "░".repeat(Math.max(0, emptyCount));
+
+          const contextRow = (
+            <Box key="context" flexDirection="row" marginLeft={2} marginTop={1}>
+              <Box width={terminalWidth - 14}>
+                <Text>
+                  <Text dimColor>Context window</Text>
+                </Text>
+              </Box>
+            </Box>
+          );
+
+          const contextBarRow = (
+            <Box key="context-bar" flexDirection="row" marginLeft={2}>
+              <Box width={terminalWidth - 14}>
+                <Text>
+                  {"  "}
+                  <Text color={getCurrentTheme().accent}>{bar}</Text>
+                  {"    "}
+                  <Text bold color={getCurrentTheme().warning}>
+                    {usageResult.contextPercent}%
+                  </Text>
+                  {"  "}
+                  <Text dimColor>
+                    ({usageResult.contextUsed.toLocaleString()} /{" "}
+                    {usageResult.contextLimit.toLocaleString()})
+                  </Text>
+                </Text>
+              </Box>
+            </Box>
+          );
+
+          displayContent = (
+            <Box flexDirection="column" width={terminalWidth - 8}>
+              <Box flexDirection="column">
+                <Box marginLeft={2}>
+                  <Text dimColor>Session usage</Text>
+                </Box>
+                {modelRows}
+                <Box marginTop={0}>{totalRow}</Box>
+                <Box marginTop={0}>{contextRow}</Box>
+                <Box marginTop={0}>{contextBarRow}</Box>
+              </Box>
+            </Box>
+          );
         } else {
           displayContent = (
             <Text color={getCurrentTheme().secondary}>(no data)</Text>
@@ -613,20 +676,20 @@ export function CommandMessage({ commandMessage }: CommandMessageProps) {
     }
 
     return (
-      <Box marginTop={1} width={terminalWidth - 4}>
-        <Box marginRight={1}>
-          <Text color={iconColor}>
-            {status === "executing" ? loadingIcons[loadingIconIndex] : "●"}
-          </Text>
-        </Box>
-        <Box flexDirection="column">
+      <Box
+        marginTop={1}
+        width={terminalWidth - 4}
+        flexDirection="column"
+        borderStyle="round"
+        borderColor={getCurrentTheme().secondary}
+        paddingX={1}
+        paddingY={1}
+      >
+        <Box marginLeft={1}>
           <Text bold>Usage</Text>
-          <Box flexDirection="row">
-            <Box>
-              <Text>⎿{"  "}</Text>
-            </Box>
-            <Box flexDirection="column">{displayContent}</Box>
-          </Box>
+        </Box>
+        <Box flexDirection="column" marginTop={1}>
+          {displayContent}
         </Box>
       </Box>
     );
