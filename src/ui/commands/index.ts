@@ -47,6 +47,7 @@ export const COMMANDS_BY_NAME: Partial<Record<CommandName, AnyCommandHandler>> =
   "/login": loginCommand,
   "/mcp": mcpCommand,
   "/model": modelCommand,
+  "/sessions": sessionsCommand,
   "/status": statusCommand,
   "/update": updateCommand,
 };
