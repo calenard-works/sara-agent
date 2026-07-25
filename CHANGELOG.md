@@ -6,6 +6,8 @@
 - `sara update` CLI command — runs `npm i -g --ignore-scripts sara-agent` with streaming output
 - Update notification box at the top of the TUI when a newer version is available on npm
 - Bordered notification panel with "Update Available!" message and instructions
+- **Shell mode** — type `!` on empty input to enter shell mode (purple border). Everything after `!` is executed as a shell command, output shown inline
+- Base URL is now displayed in gray next to each provider in the `/login` provider selector
 
 ### Changed
 - Update notification moved from yellow inline text in the help bar to a prominent bordered box at the top of the interface

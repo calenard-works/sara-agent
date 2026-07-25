@@ -84,6 +84,9 @@ export function PromptInput({
 
   const [escTips, setEscTips] = useState<string | undefined>(undefined);
 
+  // Shell mode state - triggered by ! at the beginning of empty input
+  const [shellMode, setShellMode] = useState<boolean>(false);
+
   // Help mode state - triggered by ? at the beginning of input
   const [helpMode, setHelpMode] = useState<boolean>(false);
 
@@ -130,6 +133,9 @@ export function PromptInput({
       const current = value;
       const trimmed = current.trim();
 
+      // Exit shell mode on submit
+      if (shellMode) setShellMode(false);
+
       if (
         trimmed.toLowerCase() === "exit" ||
         trimmed.toLowerCase() === "quit" ||
@@ -162,7 +168,7 @@ export function PromptInput({
         updateRefsAndRerender("", 0);
       }
     },
-    [onExit, onSubmit, updateRefsAndRerender, actions, onExecuteCommand],
+    [onExit, onSubmit, updateRefsAndRerender, actions, onExecuteCommand, shellMode],
   );
 
   // Handle external editor
@@ -509,11 +515,18 @@ export function PromptInput({
       let nextValue = currentValue;
 
       if (key.leftArrow) {
-        nextCursor = Math.max(0, currentCursor - 1);
+        nextCursor = shellMode
+          ? Math.max(1, currentCursor - 1)
+          : Math.max(0, currentCursor - 1);
       } else if (key.rightArrow) {
         nextCursor = Math.min(currentValue.length, currentCursor + 1);
       } else if (key.backspace || key.delete) {
-        if (currentCursor > 0) {
+        if (shellMode && currentCursor <= 1) {
+          // Backspace at the ! prefix exits shell mode
+          setShellMode(false);
+          nextValue = "";
+          nextCursor = 0;
+        } else if (currentCursor > 0) {
           nextValue =
             currentValue.slice(0, currentCursor - 1) +
             currentValue.slice(currentCursor);
@@ -528,19 +541,33 @@ export function PromptInput({
         // Clear any existing errors when user starts typing
         actions.setError(undefined);
 
+        // Wildcard ! shell mode: empty input + "!" → enter shell mode
+        if (
+          !shellMode &&
+          normalizedInput === "!" &&
+          currentValue.length === 0 &&
+          currentCursor === 0
+        ) {
+          setShellMode(true);
+          nextValue = "!";
+          nextCursor = 1;
+          updateRefsAndRerender(nextValue, nextCursor);
+          return;
+        }
+
         // Check for ? at the beginning of input to trigger help mode
         if (
+          !shellMode &&
           normalizedInput === "?" &&
           currentValue.length === 0 &&
           currentCursor === 0
         ) {
-          // Activate help mode and don't add ? to the input
           setHelpMode((m) => !m);
           return;
         }
 
-        // Check for @ input to trigger mention mode
-        if (normalizedInput === "@") {
+        // Check for @ input to trigger mention mode (not in shell mode)
+        if (!shellMode && normalizedInput === "@") {
           setMentionMode(true);
         }
 
@@ -566,16 +593,25 @@ export function PromptInput({
     ],
   );
 
+  const SHELL_MODE_COLOR = "#a855f7";
+
   return (
     <Box width="100%" flexDirection="column">
       {/* Input box */}
       <Box
         flexDirection="column"
         borderStyle="round"
-        borderColor={getCurrentTheme().secondary}
+        borderColor={shellMode ? SHELL_MODE_COLOR : getCurrentTheme().secondary}
         paddingX={1}
         paddingY={0}
       >
+        {shellMode && (
+          <Box marginBottom={1}>
+            <Text color={SHELL_MODE_COLOR} bold>
+              ! shell mode
+            </Text>
+          </Box>
+        )}
         <Box flexDirection="column" width="100%">
           {renderText()
             .split("\n")

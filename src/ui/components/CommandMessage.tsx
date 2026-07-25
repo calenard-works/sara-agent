@@ -11,6 +11,7 @@ import {
   ConfigResult,
   HelpResult,
   MCPResult,
+  ShellResult,
   StatusResult,
   UpdateResult,
 } from "../commands/command.types";
@@ -364,6 +365,63 @@ export function CommandMessage({ commandMessage }: CommandMessageProps) {
         </Box>
         <Box flexDirection="column">
           <Text bold>Update</Text>
+          <Box flexDirection="row">
+            <Box>
+              <Text>⎿{"  "}</Text>
+            </Box>
+            <Box flexDirection="column">{displayContent}</Box>
+          </Box>
+        </Box>
+      </Box>
+    );
+  }
+
+  // Special handling for /shell command: show shell command output
+  if (commandName === "/shell") {
+    let iconColor: string | undefined = undefined;
+    let displayContent: React.ReactNode = "";
+
+    switch (status) {
+      case "executing":
+        iconColor = getCurrentTheme().secondary;
+        displayContent = <Text>running...</Text>;
+        break;
+      case "success": {
+        iconColor = "#a855f7";
+        const shellResult = result as ShellResult | undefined;
+        if (shellResult?.output) {
+          displayContent = (
+            <Box flexDirection="column">
+              <Text color="#a855f7" dimColor>
+                $ {shellResult.command}
+              </Text>
+              <Text>{shellResult.output}</Text>
+            </Box>
+          );
+        } else {
+          displayContent = (
+            <Text color={getCurrentTheme().secondary}>(no output)</Text>
+          );
+        }
+        break;
+      }
+      case "error":
+        iconColor = getCurrentTheme().error;
+        displayContent = (
+          <Text color={getCurrentTheme().error}>{error || "Command failed"}</Text>
+        );
+        break;
+    }
+
+    return (
+      <Box marginTop={1} width={terminalWidth - 4}>
+        <Box marginRight={1}>
+          <Text color={iconColor}>
+            {status === "executing" ? loadingIcons[loadingIconIndex] : "$"}
+          </Text>
+        </Box>
+        <Box flexDirection="column">
+          <Text bold color="#a855f7">Shell</Text>
           <Box flexDirection="row">
             <Box>
               <Text>⎿{"  "}</Text>

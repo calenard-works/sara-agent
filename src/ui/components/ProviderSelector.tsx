@@ -9,6 +9,7 @@ const MAX_VISIBLE = 6;
 interface Provider {
   id: string;
   name: string;
+  baseURL?: string;
 }
 
 interface ProviderSelectorProps {
@@ -165,6 +166,9 @@ export function ProviderSelector({
             <Text key={provider.id} color={color}>
               {prefix}
               {provider.name}
+              {provider.baseURL ? (
+                <Text dimColor> ({provider.baseURL})</Text>
+              ) : null}
               {isSelected ? "  ←" : ""}
             </Text>
           );

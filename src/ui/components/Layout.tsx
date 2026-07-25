@@ -149,7 +149,7 @@ export function Layout({
 
   // Interactive mode handlers
   const handleLoginProviderSelect = useCallback(
-    async (provider: { id: string; name: string }) => {
+    async (provider: { id: string; name: string; baseURL?: string }) => {
       actions.setInteractiveMode({
         type: "login-key",
         provider,

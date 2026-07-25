@@ -1,3 +1,4 @@
+import { execSync } from "child_process";
 import { useEffect, useCallback, useRef } from "react";
 import { useEffectEvent } from "use-effect-event";
 import { useApp, useInput } from "ink";
@@ -16,7 +17,7 @@ import { Layout } from "./components/Layout";
 import { useAppState } from "./hooks/useAppState";
 import { createClient } from "../llm/client";
 import { executeCommand } from "./commands/executor";
-import { CommandName } from "./commands";
+import { CommandName, CommandCall } from "./commands";
 import { mcpService } from "../mcp";
 import { ConfigManager } from "../config";
 import { getAllProviders } from "../models/registry";
@@ -89,6 +90,7 @@ export function App({ cwd, approvalMode }: AppProps) {
             providers: allProviders.map((p) => ({
               id: p.id,
               name: p.name,
+              baseURL: p.baseURL,
             })),
           });
         })
@@ -97,8 +99,8 @@ export function App({ cwd, approvalMode }: AppProps) {
           setInteractiveMode({
             type: "login-provider",
             providers: [
-              { id: "deepseek", name: "DeepSeek" },
-              { id: "openai", name: "OpenAI" },
+              { id: "deepseek", name: "DeepSeek", baseURL: "https://api.deepseek.com/v1" },
+              { id: "openai", name: "OpenAI", baseURL: "https://api.openai.com/v1" },
               { id: "glm", name: "GLM (智谱AI)" },
             ],
           });
@@ -150,6 +152,50 @@ export function App({ cwd, approvalMode }: AppProps) {
   });
 
   const handleSubmit = useCallback(async (value: string): Promise<void> => {
+    // Shell mode: execute command directly (value starts with "!")
+    if (value.startsWith("!")) {
+      const cmd = value.slice(1).trim();
+      if (!cmd) return;
+
+      const startedAt = new Date().toISOString();
+      const callId = `/shell_${Date.now()}`;
+      const commandCall: CommandCall<"/shell"> = {
+        kind: "cmd",
+        commandName: "/shell",
+        callId,
+        status: "executing" as const,
+        startedAt,
+      };
+      actions.addCommandCall(commandCall);
+
+      try {
+        const output = execSync(cmd, {
+          cwd,
+          encoding: "utf-8",
+          timeout: 60_000,
+          maxBuffer: 10 * 1024 * 1024,
+        });
+        const completedCall = {
+          ...commandCall,
+          status: "success" as const,
+          endedAt: new Date().toISOString(),
+          result: { command: cmd, output: output || "" },
+        };
+        actions.completeCommandCall(completedCall);
+      } catch (error: unknown) {
+        const errMsg = error instanceof Error ? error.message : String(error);
+        const completedCall = {
+          ...commandCall,
+          status: "error" as const,
+          endedAt: new Date().toISOString(),
+          error: errMsg,
+          result: { command: cmd, output: errMsg },
+        };
+        actions.completeCommandCall(completedCall);
+      }
+      return;
+    }
+
     // Create abort controller for this request
     const ac = actions.createAbortController();
     actions.startRequest(value);
