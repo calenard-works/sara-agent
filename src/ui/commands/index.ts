@@ -9,6 +9,8 @@ import { modelCommand } from "./modelCommand";
 import { statusCommand } from "./statusCommand";
 import { updateCommand } from "./updateCommand";
 
+import type { CommandName, CommandHandler } from "./command.types";
+
 /**
  * All available command handlers with their names
  */
@@ -26,9 +28,15 @@ export const ALL_COMMANDS = [
 ] as const;
 
 /**
- * Mapping of command names to command handlers
+ * Helper: a command handler that accepts any CommandName.
  */
-export const COMMANDS_BY_NAME = {
+type AnyCommandHandler = CommandHandler<unknown>;
+
+/**
+ * Mapping of command names to command handlers.
+ * Partial — `/welcome` is not a real command.
+ */
+export const COMMANDS_BY_NAME: Partial<Record<CommandName, AnyCommandHandler>> = {
   "/clear": clearCommand,
   "/compact": compactCommand,
   "/config": configCommand,

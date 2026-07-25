@@ -73,7 +73,7 @@ export function App({ cwd, approvalMode }: AppProps) {
       const startedAt = new Date().toISOString();
       addCommandCall({
         kind: "cmd" as const,
-        commandName: "/welcome" as any,
+        commandName: "/welcome",
         callId: `/welcome_${Date.now()}`,
         status: "success" as const,
         startedAt,

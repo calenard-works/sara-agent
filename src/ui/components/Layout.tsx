@@ -4,6 +4,8 @@ import { Box, Text } from "ink";
 
 import type { PermissionOption } from "../../permissions/types";
 import type { AppState, AppActions } from "../hooks/useAppState";
+import type { LLMMessage } from "../../sessions/types";
+import { isTransientToolState } from "../../tools/runner.types";
 import { Logo } from "./Logo";
 import { ConfigManager } from "../../config";
 import MessageFeed from "./MessageFeed";
@@ -40,22 +42,70 @@ export function Layout({
   isAgentExecuting = false,
   onExecuteCommand,
 }: LayoutProps) {
-  const [loadingIconIndex, setLoadingIconIndex] = useState(0);
-  const loadingIcons = useMemo(() => ["◐", "◓", "◑", "◒"], []);
+  const [dotIndex, setDotIndex] = useState(0);
+  const dots = useMemo(() => ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"], []);
 
   useEffect(() => {
-    if (!state.isLLMGenerating) return;
+    if (!state.isLLMGenerating && !isAgentExecuting) return;
     const interval = setInterval(() => {
-      setLoadingIconIndex((prev) => (prev + 1) % loadingIcons.length);
-    }, 250);
+      setDotIndex((prev) => (prev + 1) % dots.length);
+    }, 120);
     return () => clearInterval(interval);
-  }, [state.isLLMGenerating, loadingIcons.length]);
+  }, [state.isLLMGenerating, isAgentExecuting, dots.length]);
 
   const hasPermissionRequest = state.toolCalls.some(
     (c) => c.status === "permission_required",
   );
 
   const isInInteractiveMode = state.interactiveMode !== null;
+
+  /** Extract the latest `# Heading` from the streaming LLM content */
+  const thinkingHeading = useMemo(() => {
+    if (!state.isLLMGenerating) return undefined;
+    const msgs = state.messages;
+    for (let i = msgs.length - 1; i >= 0; i--) {
+      const m = msgs[i];
+      if (
+        m.kind === "api" &&
+        m.status === "streaming" &&
+        m.message.role === "assistant"
+      ) {
+        const content = m.message.content;
+        if (typeof content !== "string") return undefined;
+        const lines = content.split("\n");
+        for (let j = lines.length - 1; j >= 0; j--) {
+          const match = lines[j].match(/^#\s+(.+)/);
+          if (match) return match[1].trim();
+        }
+        return undefined;
+      }
+    }
+    return undefined;
+  }, [state.isLLMGenerating, state.messages]);
+
+  /** Build a human-readable status label for the dots spinner */
+  const statusLabel = useMemo(() => {
+    // Tool execution phase
+    const runningTools = state.toolCalls.filter((tc) =>
+      isTransientToolState(tc.status),
+    );
+    if (runningTools.length > 0) {
+      const hasBash = runningTools.some((tc) => tc.toolName === "Bash");
+      if (hasBash) return "Running...";
+      return "Working...";
+    }
+
+    // LLM thinking phase
+    if (state.isLLMGenerating) {
+      if (thinkingHeading) return thinkingHeading;
+      return "Thinking...";
+    }
+
+    return undefined;
+  }, [state.isLLMGenerating, state.toolCalls, thinkingHeading]);
+
+  const shouldShowStatus =
+    !hasPermissionRequest && (state.isLLMGenerating || statusLabel !== undefined);
 
   const logo = useMemo(() => {
     let modelName = "unknown";
@@ -229,10 +279,10 @@ export function Layout({
           </Box>
         )}
 
-        {!hasPermissionRequest && state.isLLMGenerating && (
+        {shouldShowStatus && (
           <Box marginTop={1}>
             <Text color={getCurrentTheme().brand}>
-              {loadingIcons[loadingIconIndex]} (Working... esc to cancel)
+              {dots[dotIndex]} {statusLabel}
             </Text>
           </Box>
         )}

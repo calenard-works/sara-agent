@@ -635,6 +635,7 @@ export function PromptInput({
           tokenUsage={state.tokenUsage}
           version={VERSION}
           updateAvailable={updateAvailable}
+          isExecuting={isAgentExecuting}
         />
       )}
     </Box>

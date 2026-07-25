@@ -21,7 +21,8 @@ export type CommandName =
   | "/login"
   | "/model"
   | "/status"
-  | "/update";
+  | "/update"
+  | "/welcome";
 
 /**
  * Command result types for each command
@@ -82,7 +83,9 @@ export type CommandConcreteResult<T extends CommandName> = T extends "/clear"
                 ? StatusResult
                 : T extends "/update"
                   ? UpdateResult
-                  : never;
+                  : T extends "/welcome"
+                    ? undefined
+                    : never;
 
 /**
  * Command call interface - represents a command execution
