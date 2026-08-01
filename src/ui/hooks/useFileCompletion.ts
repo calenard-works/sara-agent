@@ -7,6 +7,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 
+import { listDirectory } from "../../mentions/directoryListing";
 import { fuzzyMatch } from "../../mentions/fuzzyMatcher";
 import { fileScanner } from "../../mentions/scanner";
 import { FileEntry } from "../../mentions/types";
@@ -132,14 +133,22 @@ export function useFileCompletion(
   }, [cwd, enabled, scanTrigger]);
 
   /**
-   * Perform fuzzy matching on the scanned files
+   * Compute autocomplete suggestions
    * Memoized to avoid re-calculating on every render
    *
-   * For directories, adds trailing slash to path for clear folder indication
+   * - Empty query or a query containing "/" uses a directory-aware listing so
+   *   users can browse folders (deps of ←/→ navigation).
+   * - Otherwise the whole tree is fuzzy matched (e.g. typing `@uti` finds
+   *   `src/utils/helper.ts` directly).
+   * - Directory paths include a trailing slash for clear folder indication.
    */
   const suggestions = useMemo(() => {
     if (!enabled || allFiles.length === 0) {
       return [];
+    }
+
+    if (query === "" || query.includes("/")) {
+      return listDirectory(query, allFiles, maxResults);
     }
 
     const matches = fuzzyMatch(query, allFiles);

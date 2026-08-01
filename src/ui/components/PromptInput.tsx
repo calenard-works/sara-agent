@@ -378,10 +378,50 @@ export function PromptInput({
   const shouldShowSelector = mentionContext && allSuggestions.length > 0;
 
   /**
+   * Update the @mention query inside the input buffer while keeping mention
+   * mode active. Used for folder navigation (←/→) so the selector follows the
+   * new directory. No trailing space: a space would exit mention mode.
+   */
+  const updateMentionQuery = useCallback(
+    (newQuery: string) => {
+      if (!mentionContext) return;
+      const before = valueRef.current.slice(0, mentionContext.start);
+      const after = valueRef.current.slice(cursorRef.current);
+      const newBuffer = `${before}@${newQuery}${after}`;
+      const newCursorPos = mentionContext.start + 1 + newQuery.length;
+      updateRefsAndRerender(newBuffer, newCursorPos);
+    },
+    [mentionContext, updateRefsAndRerender],
+  );
+
+  /** Navigate to the parent directory of the current @mention query. */
+  const navigateMentionUp = useCallback(() => {
+    if (!mentionContext) return;
+    const lastSlash = mentionContext.prefix.lastIndexOf("/");
+    if (lastSlash === -1) {
+      updateMentionQuery(""); // back to the project root listing
+    } else {
+      updateMentionQuery(mentionContext.prefix.slice(0, lastSlash + 1));
+    }
+  }, [mentionContext, updateMentionQuery]);
+
+  /** Enter the currently selected directory (".." goes back up). */
+  const navigateMentionIntoSelection = useCallback(() => {
+    const selected = allSuggestions[selectedMentionFileIndex];
+    if (!selected || selected.type !== "directory") return;
+    if (selected.path === "..") {
+      navigateMentionUp();
+      return;
+    }
+    updateMentionQuery(selected.path); // directory paths end with "/"
+  }, [allSuggestions, selectedMentionFileIndex, navigateMentionUp, updateMentionQuery]);
+
+  /**
    * Handle file/directory selection from @mention autocomplete
    *
    * Replaces partial @mention with complete path and positions cursor correctly.
    * Directory paths already include trailing slash from useFileCompletion.
+   * Selecting ".." navigates to the parent directory instead of completing.
    */
   const handleFileSelect = useCallback(
     (selectedMentionFileIndex: number) => {
@@ -393,6 +433,13 @@ export function PromptInput({
         return;
 
       const selectedSuggestion = allSuggestions[selectedMentionFileIndex];
+
+      // ".." entry navigates to the parent directory
+      if (selectedSuggestion.path === "..") {
+        navigateMentionUp();
+        return;
+      }
+
       const selectedPath = selectedSuggestion.path;
 
       // Replace the @mention with the selected path
@@ -416,7 +463,13 @@ export function PromptInput({
       setMentionMode(false);
       setSelectedMentionFileIndex(0);
     },
-    [mentionContext, allSuggestions, setMentionMode, updateRefsAndRerender],
+    [
+      mentionContext,
+      allSuggestions,
+      setMentionMode,
+      updateRefsAndRerender,
+      navigateMentionUp,
+    ],
   );
 
   // Text rendering logic - use REFS as primary data source
@@ -496,6 +549,14 @@ export function PromptInput({
           setSelectedMentionFileIndex((prev) =>
             Math.min(allSuggestions.length - 1, prev + 1),
           );
+          return;
+        } else if (key.leftArrow) {
+          // Exit the current folder (parent directory)
+          navigateMentionUp();
+          return;
+        } else if (key.rightArrow) {
+          // Enter the selected folder
+          navigateMentionIntoSelection();
           return;
         } else if (key.return && allSuggestions[selectedMentionFileIndex]) {
           handleFileSelect(selectedMentionFileIndex);
