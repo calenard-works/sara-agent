@@ -24,14 +24,20 @@ import type {
 } from "../../../tools/types";
 import type { ToolCall } from "../../../tools/runner.types";
 import { ArchitectResultView } from "./ArchitectResultView";
+import { AgentResultView } from "./AgentResultView";
 import { AskUserQuestionResultView } from "./AskUserQuestionResultView";
 import { BashResultView } from "./BashResultView";
 import { FetchResultView } from "./FetchResultView";
 import { FileEditResultView } from "./FileEditResultView";
 import { FileReadResultView } from "./FileReadResultView";
 import { GlobResultView } from "./GlobResultView";
+import { GoalResultView } from "./GoalResultView";
 import { GrepResultView } from "./GrepResultView";
 import { ListFilesResultView } from "./ListFilesResultView";
+import { PlanModeResultView } from "./PlanModeResultView";
+import { SelectToolsResultView } from "./SelectToolsResultView";
+import { SkillResultView } from "./SkillResultView";
+import { TaskResultView } from "./TaskResultView";
 import { TodoResultView } from "./TodoResultView";
 import { WebSearchResultView } from "./WebSearchResultView";
 import { WriteResultView } from "./WriteResultView";
@@ -209,6 +215,48 @@ export function getToolResultView(
       return (toolCall) =>
         React.createElement(AskUserQuestionResultView, {
           result: toolCall.result as { answers: Record<string, string> },
+        });
+    case "CreateGoal":
+    case "GetGoal":
+    case "UpdateGoal":
+    case "SetGoalBudget":
+      return (toolCall) =>
+        React.createElement(GoalResultView, {
+          result: toolCall.result as Record<string, unknown>,
+        });
+    case "TaskList":
+    case "TaskOutput":
+    case "TaskStop":
+      return (toolCall) =>
+        React.createElement(TaskResultView, {
+          result: toolCall.result as Record<string, unknown>,
+        });
+    case "Agent":
+    case "AgentSwarm":
+      return (toolCall) =>
+        React.createElement(AgentResultView, {
+          result: toolCall.result as Record<string, unknown>,
+        });
+    case "EnterPlanMode":
+    case "ExitPlanMode":
+      return (toolCall) =>
+        React.createElement(PlanModeResultView, {
+          result: toolCall.result as { message: string },
+        });
+    case "Skill":
+      return (toolCall) =>
+        React.createElement(SkillResultView, {
+          result: toolCall.result as { output: string },
+        });
+    case "select_tools":
+      return (toolCall) =>
+        React.createElement(SelectToolsResultView, {
+          result: toolCall.result as {
+            message: string;
+            loaded: string[];
+            alreadyAvailable: string[];
+            unknown: string[];
+          },
         });
     case "WebSearch":
       return (toolCall) =>
