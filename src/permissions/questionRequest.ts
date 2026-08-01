@@ -23,8 +23,11 @@ export interface QuestionOption {
 export interface Question {
   question: string;
   header?: string;
+  body?: string;
   options: QuestionOption[];
   multi_select?: boolean;
+  other_label?: string;
+  other_description?: string;
 }
 
 export type QuestionAnswers = Record<string, string>;
@@ -33,7 +36,7 @@ interface PendingQuestionEntry {
   questions: Question[];
   background: boolean;
   resolve: (answers: QuestionAnswers) => void;
-  reject: (reason: string) => void;
+  reject: (reason?: unknown) => void;
   timeoutId: NodeJS.Timeout;
 }
 

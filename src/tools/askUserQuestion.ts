@@ -10,6 +10,10 @@ const QuestionOptionSchema = z.object({
 const QuestionSchema = z.object({
   question: z.string().min(1).describe("The question to ask the user"),
   header: z.string().optional().describe("Optional header or title for the question"),
+  body: z
+    .string()
+    .optional()
+    .describe("Optional detailed description shown under the question"),
   options: z
     .array(QuestionOptionSchema)
     .min(1)
@@ -18,6 +22,14 @@ const QuestionSchema = z.object({
     .boolean()
     .optional()
     .describe("Whether the user can select multiple options"),
+  other_label: z
+    .string()
+    .optional()
+    .describe("Label for the custom 'Other' answer option (default: 'Other')"),
+  other_description: z
+    .string()
+    .optional()
+    .describe("Optional description for the 'Other' option"),
 });
 
 const InputSchema = z.object({
@@ -35,11 +47,14 @@ export type AskUserQuestionInput = {
   questions: Array<{
     question: string;
     header?: string;
+    body?: string;
     options: Array<{
       label: string;
       description?: string;
     }>;
     multi_select?: boolean;
+    other_label?: string;
+    other_description?: string;
   }>;
   background?: boolean;
 };
@@ -52,8 +67,11 @@ export type QuestionOption = {
 export type Question = {
   question: string;
   header?: string;
+  body?: string;
   options: QuestionOption[];
   multi_select?: boolean;
+  other_label?: string;
+  other_description?: string;
 };
 
 type AskUserQuestionOutput =
@@ -65,14 +83,15 @@ type AskUserQuestionOutput =
 export const AskUserQuestionTool: Tool<AskUserQuestionInput, AskUserQuestionOutput> = {
   name: "AskUserQuestion",
   displayName: "Ask User Question",
-  description: `Ask the user a question with predefined answer options.
+  description: `Ask the user one or more questions with predefined answer options.
 
 Use this when you need to make a decision that requires user input, such as choosing between multiple valid approaches or confirming a specific action.
 
 FEATURES:
-- Present one or more questions to the user in a structured format
-- Each question can have a header, predefined options, and optional multi-select
+- Present one or more questions to the user; each question gets its own tab, and a final Submit tab reviews every answer before confirmation
+- Each question can have a header, an optional detailed body, predefined options, and optional multi-select
 - Options can include descriptions for additional context
+- Each question automatically includes a custom "Other" option (label configurable via other_label) where the user can type their own answer
 - Supports background execution for non-blocking question prompts`,
   readonly: true,
   inputSchema: InputSchema,
