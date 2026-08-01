@@ -6,7 +6,7 @@
  * select, escape to close). Folder navigation (←/→) is handled by PromptInput.
  *
  * Features:
- * - Shows both files (📄) and directories (📁) with appropriate icons
+ * - Folders (with trailing "/") highlighted in the brand color, files dimmed
  * - Viewport scrolling keeps the selected entry visible when the list overflows
  * - Navigation help line at the bottom
  */
@@ -74,17 +74,18 @@ export function FileSelector({
         const isSelected = scrollOffset + viewIndex === selectedIndex;
         const { path, type } = entry;
 
-        // Choose appropriate icon based on type
-        const icon = type === "directory" ? "📁" : "📄";
+        // Folders (trailing "/") get the brand color, files stay dimmed
+        const color = isSelected
+          ? theme.accent
+          : type === "directory"
+            ? theme.primary
+            : theme.secondary;
 
         return (
           <Box key={path}>
-            <Text
-              color={!isSelected ? theme.secondary : theme.accent}
-              bold={isSelected}
-            >
+            <Text color={color} bold={isSelected}>
               {isSelected ? "› " : "  "}
-              {icon} {path}
+              {path}
             </Text>
           </Box>
         );
