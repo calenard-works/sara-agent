@@ -13,6 +13,21 @@ import type { AppState, AppActions } from "../hooks/useAppState";
 import { ALL_COMMANDS, CommandName, COMMANDS_BY_NAME } from "../commands";
 import { calculateMentionContext } from "../../mentions/context";
 
+// Rotating placeholder tips shown while the input is empty.
+// The first entry keeps the original default so nothing changes on first render.
+const PLACEHOLDER_TIPS: string[] = [
+  "Type your prompt",
+  "Type / to see available commands",
+  "Ask me to fix a bug, refactor code, or add tests",
+  "Mention files with @ to give context",
+  "Prefix ! to run a shell command",
+  "Alt+Enter or Shift+Enter for multiline input",
+  "Try /plan to plan changes without applying them",
+  "Try /sessions to switch between chats",
+  "Ask about this codebase — I can search and read files",
+  "Ctrl+C twice to exit",
+];
+
 /**
  * ===== PromptInput Component =====
  *
@@ -64,7 +79,7 @@ export interface PromptInputProps {
 }
 
 export function PromptInput({
-  placeholder = "Type your prompt",
+  placeholder,
   onSubmit,
   onExit,
   cwd,
@@ -89,6 +104,9 @@ export function PromptInput({
   // Shell mode state - triggered by ! at the beginning of empty input
   const [shellMode, setShellMode] = useState<boolean>(false);
 
+  // Rotating placeholder index (only visible while the input is empty)
+  const [tipIndex, setTipIndex] = useState<number>(0);
+
   // Help mode state - triggered by ? at the beginning of input
   const [helpMode, setHelpMode] = useState<boolean>(false);
 
@@ -107,6 +125,14 @@ export function PromptInput({
         escTipsTimeoutRef.current = null;
       }
     };
+  }, []);
+
+  // Rotate the placeholder tip every 5 seconds while the input is empty
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTipIndex((prev) => (prev + 1) % PLACEHOLDER_TIPS.length);
+    }, 5000);
+    return () => clearInterval(interval);
   }, []);
 
   // Simple counter to trigger React re-renders
@@ -397,14 +423,16 @@ export function PromptInput({
   const renderText = () => {
     const value = valueRef.current;
     const cursorPosition = cursorRef.current;
+    const resolvedPlaceholder = placeholder ?? PLACEHOLDER_TIPS[tipIndex % PLACEHOLDER_TIPS.length];
 
     let renderedValue = value;
     let renderedPlaceholder = undefined;
 
-    if (value.length === 0 && placeholder) {
+    if (value.length === 0 && resolvedPlaceholder) {
       // Show placeholder with cursor
       renderedPlaceholder =
-        chalk.inverse(placeholder[0]) + chalk.grey(placeholder.slice(1));
+        chalk.inverse(resolvedPlaceholder[0]) +
+        chalk.grey(resolvedPlaceholder.slice(1));
     } else if (value.length > 0) {
       // Show value with cursor
       renderedValue = "";
