@@ -18,7 +18,6 @@ import { reloadTuiCommand } from "./reloadTuiCommand";
 import { sessionsCommand } from "./sessionsCommand";
 import { statusCommand } from "./statusCommand";
 import { tasksCommand } from "./tasksCommand";
-import { updateCommand } from "./updateCommand";
 import { usageCommand } from "./usageCommand";
 import { versionCommand } from "./versionCommand";
 
@@ -47,7 +46,6 @@ export const ALL_COMMANDS = [
   sessionsCommand,
   statusCommand,
   tasksCommand,
-  updateCommand,
   usageCommand,
   versionCommand,
   yoloCommand,
@@ -82,7 +80,6 @@ export const COMMANDS_BY_NAME: Partial<Record<CommandName, AnyCommandHandler>> =
   "/sessions": sessionsCommand,
   "/status": statusCommand,
   "/tasks": tasksCommand,
-  "/update": updateCommand,
   "/usage": usageCommand,
   "/version": versionCommand,
   "/yolo": yoloCommand,

@@ -32,7 +32,6 @@ export type CommandName =
   | "/shell"
   | "/status"
   | "/tasks"
-  | "/update"
   | "/usage"
   | "/version"
   | "/welcome"
@@ -124,12 +123,6 @@ export type PermissionResult = void;
 
 export type YoloResult = void;
 
-export type UpdateResult = {
-  updated: boolean;
-  version: string;
-  releaseNotes?: string;
-};
-
 export type ShellResult = { command: string; output: string };
 
 export type MCPResult = MCPServerState[];
@@ -179,8 +172,6 @@ export type CommandConcreteResult<T extends CommandName> = T extends "/autoedit"
                                 ? StatusResult
                                 : T extends "/tasks"
                                   ? TasksResult
-                                  : T extends "/update"
-                                  ? UpdateResult
                                   : T extends "/usage"
                                     ? UsageResult
                                     : T extends "/version"

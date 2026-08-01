@@ -26,7 +26,7 @@ When the user asks how Sara works, what commands are available, or how to config
 Key topics:
 - CLI usage: sara [prompt], flags (-a, -w, -s, -c, --version)
 - Configuration: ~/.config/sara/config.toml, llm.model, llm.baseURL, llm.apiKey
-- Slash commands: /login, /model, /clear, /help, /config, /init, /sessions, /status, /export, /compact, /update, /plan, /yolo, /usage, /version, /reload-tui, /btw, /mcp
+- Slash commands: /login, /model, /clear, /help, /config, /init, /sessions, /status, /export, /compact, /plan, /yolo, /usage, /version, /reload-tui, /btw, /mcp
 - Interactive modes: login, model selection, session management, permission picker
 - Permission modes: default, autoEdit, yolo
 - Shell mode: prefix with ! to run shell commands directly

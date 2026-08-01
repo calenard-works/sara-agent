@@ -8,7 +8,6 @@ import type { LLMMessage, Session } from "../../sessions/types";
 import { isTransientToolState } from "../../tools/runner.types";
 import { Logo } from "./Logo";
 import { ConfigManager } from "../../config";
-import { VERSION } from "../../version";
 import MessageFeed from "./MessageFeed";
 import { PromptInput } from "./PromptInput";
 import ErrorView from "./ErrorView";
@@ -38,23 +37,6 @@ export interface LayoutProps {
   onExecuteCommand: (command: CommandName, args?: string) => Promise<void>;
   onQuestionAnswer: (id: string, answers: Record<string, string>) => void;
   onQuestionCancel: (id: string) => void;
-}
-
-/**
- * Simple semver comparison — returns true if version `b` is newer than `a`.
- * Handles "x.y.z" format. If parsing fails, falls back to string inequality.
- */
-function isNewerVersion(current: string, latest: string): boolean {
-  const cur = current.split(".").map(Number);
-  const lat = latest.split(".").map(Number);
-  if (cur.length !== 3 || lat.length !== 3 || cur.some(isNaN) || lat.some(isNaN)) {
-    return latest !== current;
-  }
-  for (let i = 0; i < 3; i++) {
-    if (lat[i]! > cur[i]!) return true;
-    if (lat[i]! < cur[i]!) return false;
-  }
-  return false;
 }
 
 export function Layout({
@@ -110,25 +92,6 @@ export function Layout({
 
   const shouldShowStatus =
     !hasPermissionRequest && (state.isLLMGenerating || statusLabel !== undefined);
-
-  // Update notification state
-  const [updateAvailable, setUpdateAvailable] = useState<string | undefined>(
-    undefined,
-  );
-  useEffect(() => {
-    const controller = new AbortController();
-    fetch("https://registry.npmjs.org/sara-agent/latest", {
-      signal: controller.signal,
-    })
-      .then((res) => res.json())
-      .then((data: { version?: string }) => {
-        if (data.version && isNewerVersion(VERSION, data.version)) {
-          setUpdateAvailable(data.version);
-        }
-      })
-      .catch(() => {});
-    return () => controller.abort();
-  }, []);
 
   // Resolve human-readable model name
   const [modelDisplayName, setModelDisplayName] = useState<string>("");
@@ -384,29 +347,6 @@ export function Layout({
   return (
     <ErrorBoundary>
       <Box flexDirection="column">
-        {updateAvailable && (
-          <Box
-            flexDirection="column"
-            borderStyle="round"
-            borderColor={getCurrentTheme().warning}
-            paddingX={2}
-            paddingY={1}
-            marginBottom={1}
-          >
-            <Box flexDirection="row" justifyContent="center">
-              <Text bold color={getCurrentTheme().warning}>
-                Update Available! Sara v{updateAvailable}
-              </Text>
-            </Box>
-            <Box flexDirection="row" justifyContent="center" marginTop={1}>
-              <Text dimColor>
-                Press Ctrl+C twice and run sara update or run /update command
-                below.
-              </Text>
-            </Box>
-          </Box>
-        )}
-
         <MessageFeed
           messages={state.messages}
           toolCalls={state.toolCalls}

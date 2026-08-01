@@ -5,6 +5,29 @@ import type { NewQuestionEvent } from "../../permissions/questionRequest";
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+/**
+ * Poll `lastFrame()` until `assert` passes or the timeout elapses.
+ * Makes key-sequence tests resilient to slow CI / parallel test load.
+ */
+async function waitForFrame(
+  lastFrame: () => string,
+  assert: (frame: string) => void,
+  timeoutMs = 3000,
+): Promise<void> {
+  const start = Date.now();
+  let lastError: unknown;
+  while (Date.now() - start < timeoutMs) {
+    try {
+      assert(lastFrame());
+      return;
+    } catch (error) {
+      lastError = error;
+      await sleep(40);
+    }
+  }
+  throw lastError;
+}
+
 function makeEvent(
   questions: NewQuestionEvent["questions"],
   background = false,
@@ -43,21 +66,23 @@ describe("QuestionView", () => {
     const { stdin, lastFrame } = render(
       <QuestionView questionEvent={event} onAnswer={onAnswer} onCancel={vi.fn()} />,
     );
-    await sleep(20);
+    await sleep(30);
 
     // Enter chooses the first option (cursor starts at 0) and auto-advances
     stdin.write("\r");
-    await sleep(50);
 
-    expect(lastFrame()).toContain("Review your answer before submit");
-    expect(lastFrame()).toContain("TypeScript");
+    await waitForFrame(lastFrame, (frame) => {
+      expect(frame).toContain("Review your answer before submit");
+      expect(frame).toContain("TypeScript");
+    });
 
     // Enter confirms on the Submit tab
     stdin.write("\r");
-    await sleep(50);
 
-    expect(onAnswer).toHaveBeenCalledWith("test-q", {
-      "Pick a language?": "TypeScript",
+    await waitForFrame(lastFrame, () => {
+      expect(onAnswer).toHaveBeenCalledWith("test-q", {
+        "Pick a language?": "TypeScript",
+      });
     });
   });
 
@@ -70,23 +95,25 @@ describe("QuestionView", () => {
     const { stdin, lastFrame } = render(
       <QuestionView questionEvent={event} onAnswer={onAnswer} onCancel={vi.fn()} />,
     );
-    await sleep(20);
+    await sleep(30);
 
     // Q1: move down to A2 and choose it — auto-advances to Q2
     stdin.write("\u001b[B");
+    await sleep(60);
     stdin.write("\r");
-    await sleep(50);
-    expect(lastFrame()).toContain("Q2?");
+    await waitForFrame(lastFrame, (frame) => expect(frame).toContain("Q2?"));
 
     // Q2: Enter chooses B1 (cursor 0) — auto-advances to Submit
     stdin.write("\r");
-    await sleep(50);
-    expect(lastFrame()).toContain("Review your answer before submit");
+    await waitForFrame(lastFrame, (frame) =>
+      expect(frame).toContain("Review your answer before submit"),
+    );
 
     // Confirm
     stdin.write("\r");
-    await sleep(50);
-    expect(onAnswer).toHaveBeenCalledWith("test-q", { "Q1?": "A2", "Q2?": "B1" });
+    await waitForFrame(lastFrame, () => {
+      expect(onAnswer).toHaveBeenCalledWith("test-q", { "Q1?": "A2", "Q2?": "B1" });
+    });
   });
 
   it("supports typing a custom answer via the Other option", async () => {
@@ -97,26 +124,32 @@ describe("QuestionView", () => {
     const { stdin, lastFrame } = render(
       <QuestionView questionEvent={event} onAnswer={onAnswer} onCancel={vi.fn()} />,
     );
-    await sleep(20);
+    await sleep(30);
 
     // Move down twice to reach Other, then Enter to start typing
     stdin.write("\u001b[B");
+    await sleep(60);
     stdin.write("\u001b[B");
+    await sleep(60);
     stdin.write("\r");
-    await sleep(50);
 
     // Type the custom answer and save it
+    await waitForFrame(lastFrame, (frame) =>
+      expect(frame).toContain("Type your answer"),
+    );
     stdin.write("Green");
     stdin.write("\r");
-    await sleep(50);
 
     // Single-select auto-advances to Submit; the review shows the custom value
-    expect(lastFrame()).toContain("Review your answer before submit");
-    expect(lastFrame()).toContain("Green");
+    await waitForFrame(lastFrame, (frame) => {
+      expect(frame).toContain("Review your answer before submit");
+      expect(frame).toContain("Green");
+    });
 
     stdin.write("\r");
-    await sleep(50);
-    expect(onAnswer).toHaveBeenCalledWith("test-q", { "Color?": "Green" });
+    await waitForFrame(lastFrame, () => {
+      expect(onAnswer).toHaveBeenCalledWith("test-q", { "Color?": "Green" });
+    });
   });
 
   it("toggles multiple options with space and answers joined", async () => {
@@ -131,23 +164,29 @@ describe("QuestionView", () => {
     const { stdin, lastFrame } = render(
       <QuestionView questionEvent={event} onAnswer={onAnswer} onCancel={vi.fn()} />,
     );
-    await sleep(20);
+    await sleep(30);
 
     // Toggle X (cursor 0), move to Y, toggle Y
     stdin.write(" ");
-    await sleep(30);
+    await waitForFrame(lastFrame, (frame) => expect(frame).toContain("[✓]"));
     stdin.write("\u001b[B");
+    await sleep(60);
     stdin.write(" ");
-    await sleep(30);
+    await waitForFrame(lastFrame, (frame) => {
+      expect(frame).toContain("[✓] X");
+      expect(frame).toContain("[✓] Y");
+    });
 
     // Go to the Submit tab and confirm
     stdin.write("\u001b[C");
-    await sleep(30);
-    expect(lastFrame()).toContain("Review your answer before submit");
+    await waitForFrame(lastFrame, (frame) =>
+      expect(frame).toContain("Review your answer before submit"),
+    );
 
     stdin.write("\r");
-    await sleep(50);
-    expect(onAnswer).toHaveBeenCalledWith("test-q", { "Pick?": "X, Y" });
+    await waitForFrame(lastFrame, () => {
+      expect(onAnswer).toHaveBeenCalledWith("test-q", { "Pick?": "X, Y" });
+    });
   });
 
   it("cancels the dialog on escape", async () => {
@@ -155,13 +194,14 @@ describe("QuestionView", () => {
       { question: "Q?", options: [{ label: "A" }, { label: "B" }] },
     ]);
     const onCancel = vi.fn();
-    const { stdin } = render(
+    const { stdin, lastFrame } = render(
       <QuestionView questionEvent={event} onAnswer={vi.fn()} onCancel={onCancel} />,
     );
-    await sleep(20);
+    await sleep(30);
 
     stdin.write("\u001b");
-    await sleep(50);
-    expect(onCancel).toHaveBeenCalledWith("test-q");
+    await waitForFrame(lastFrame, () => {
+      expect(onCancel).toHaveBeenCalledWith("test-q");
+    });
   });
 });

@@ -1,11 +1,9 @@
 #!/usr/bin/env -S node --no-warnings=ExperimentalWarning
 
-import { execSync } from "child_process";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 
-import chalk from "chalk";
 import { Command } from "commander";
 import React from "react";
 import { render } from "ink";
@@ -73,34 +71,6 @@ export async function runCli(argv: string[] = process.argv): Promise<void> {
 
   // Add config subcommand
   program.addCommand(createConfigCommand());
-
-  // Add update subcommand: sara update
-  const updateCmd = new Command("update")
-    .description("Update Sara to the latest version")
-    .action(async () => {
-      console.log(
-        chalk.gray(
-          'Updating Sara with "npm i -g --ignore-scripts sara-agent"...',
-        ),
-      );
-      try {
-        execSync("npm i -g --ignore-scripts sara-agent", {
-          stdio: "inherit",
-          timeout: 120_000,
-        });
-        // Get the new version
-        const res = await fetch(
-          "https://registry.npmjs.org/sara-agent/latest",
-        );
-        const data: { version?: string } = await res.json();
-        const ver = data.version || "?";
-        console.log(chalk.green(`Updated Sara v${ver}`));
-      } catch (error) {
-        console.error(chalk.red("Update failed:"), error);
-        process.exit(1);
-      }
-    });
-  program.addCommand(updateCmd);
 
   program
     .argument("[prompt]", "task prompt (triggers non-interactive mode)")
