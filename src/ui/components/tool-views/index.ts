@@ -24,6 +24,7 @@ import type {
 } from "../../../tools/types";
 import type { ToolCall } from "../../../tools/runner.types";
 import { ArchitectResultView } from "./ArchitectResultView";
+import { AskUserQuestionResultView } from "./AskUserQuestionResultView";
 import { BashResultView } from "./BashResultView";
 import { FetchResultView } from "./FetchResultView";
 import { FileEditResultView } from "./FileEditResultView";
@@ -203,6 +204,11 @@ export function getToolResultView(
       return (toolCall) =>
         React.createElement(ArchitectResultView, {
           result: toolCall.result as ArchitectSuccess,
+        });
+    case "AskUserQuestion":
+      return (toolCall) =>
+        React.createElement(AskUserQuestionResultView, {
+          result: toolCall.result as { answers: Record<string, string> },
         });
     case "WebSearch":
       return (toolCall) =>
