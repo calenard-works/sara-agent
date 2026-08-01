@@ -4,7 +4,7 @@
  * Uses Node.js child_process to spawn Sara in non-interactive mode.
  */
 
-import { spawn, execSync } from "node:child_process";
+import { spawn, spawnSync, execSync } from "node:child_process";
 import path from "node:path";
 import fs from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -26,22 +26,63 @@ function generateAgentId(): string {
   return `agent-${agentCounter}-${ts}`;
 }
 
+let cachedDistPath: string | null = null;
+
 /**
- * Find the dist/index.mjs path relative to this source file.
+ * Locate the CLI entry point (dist/index.mjs) that subagents are spawned with.
+ *
+ * Resolution order:
+ * 1. The running module itself — when Sara is executed from the bundled
+ *    dist/index.mjs (npm global install, `node dist/index.mjs`, ...).
+ * 2. Dev tree — source layout src/agent/ with dist/ at the project root.
+ * 3. Global npm install location (npm prefix -g).
+ *
+ * Never falls back to process.cwd(): the work directory of the current
+ * session may be any project, and it does not contain Sara's bundle.
  */
 function findDistPath(): string {
+  if (cachedDistPath) return cachedDistPath;
+
+  const candidates: string[] = [];
+
   try {
-    const here = path.dirname(fileURLToPath(import.meta.url));
-    // We're in src/agent/, dist is at dist/index.mjs relative to project root
-    const root = path.resolve(here, "../..");
-    const distPath = path.join(root, "dist", "index.mjs");
-    if (fs.existsSync(distPath)) {
-      return distPath;
+    const modulePath = fileURLToPath(import.meta.url);
+    // Case 1: we are the bundled entry itself
+    if (path.basename(modulePath) === "index.mjs") {
+      candidates.push(modulePath);
     }
+    // Case 2: dev tree (src/agent/ → dist/index.mjs at project root)
+    candidates.push(
+      path.join(path.dirname(modulePath), "..", "..", "dist", "index.mjs"),
+    );
   } catch {
-    // Fallback: use the module's __dirname equivalent
+    // import.meta.url unavailable — rely on the global install fallback below
   }
-  return path.resolve(process.cwd(), "dist", "index.mjs");
+
+  // Case 3: global npm install
+  try {
+    const prefix = execSync("npm prefix -g", {
+      encoding: "utf-8",
+      timeout: 5000,
+    }).trim();
+    candidates.push(
+      path.join(prefix, "lib", "node_modules", "sara-agent", "dist", "index.mjs"),
+    );
+  } catch {
+    // npm unavailable — ignore
+  }
+
+  for (const candidate of candidates) {
+    if (fs.existsSync(candidate)) {
+      cachedDistPath = candidate;
+      return candidate;
+    }
+  }
+
+  throw new Error(
+    "Cannot locate Sara's dist/index.mjs to spawn a subagent. " +
+      "Install Sara globally (npm i -g sara-agent) or build the project first.",
+  );
 }
 
 /**
@@ -64,9 +105,11 @@ export async function runSubagent(
       ? `${description}\n\n${prompt}`
       : prompt;
 
-    // Run Sara in non-interactive mode via execSync
-    const stdout = execSync(
-      `node "${distPath}" --approval-mode yolo --work-dir "${cwd}" "${escapePrompt(fullPrompt)}"`,
+    // Run Sara in non-interactive mode. Arguments are passed as an array so
+    // the shell never interprets the prompt (backticks, quotes, $, ...).
+    const result = spawnSync(
+      "node",
+      [distPath, "--approval-mode", "yolo", "--work-dir", cwd, fullPrompt],
       {
         encoding: "utf-8",
         timeout: 600_000, // 10 minutes
@@ -75,11 +118,20 @@ export async function runSubagent(
       },
     );
 
+    if (result.error) {
+      throw result.error;
+    }
+    if (result.status !== 0) {
+      throw new Error(
+        `Subagent exited with code ${result.status}: ${(result.stderr || result.stdout || "").toString().trim()}`,
+      );
+    }
+
     return {
       agentId,
       actualSubagentType: actualType,
       status: "completed",
-      summary: stdout.trim(),
+      summary: result.stdout?.trim() ?? "",
     };
   } catch (error: unknown) {
     if (error instanceof Error) {
@@ -163,9 +215,4 @@ export function runSubagentInBackground(
   });
 
   return { taskId, agentId };
-}
-
-function escapePrompt(prompt: string): string {
-  // Escape for shell: wrap in single quotes, escape single quotes inside
-  return `'${prompt.replace(/'/g, "'\\''")}'`;
 }

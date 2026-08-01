@@ -117,7 +117,8 @@ Supports both foreground (all subagents run sequentially) and background executi
 
       // Add item-based agents
       for (const item of items) {
-        const prompt = prompt_template!.replace("{{item}}", item);
+        // Replace every {{item}} occurrence, not just the first
+        const prompt = prompt_template!.split("{{item}}").join(item);
         tasks.push({
           agentId: `swarm-${tasks.length}`,
           prompt,
